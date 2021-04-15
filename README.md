@@ -20,4 +20,4 @@ The following software needs to be installed:
 
 ## Step1:  Constructed a highly confident subset of the two haplotypes that are expected to reside in separate nuclei
 
-A gene binning step is used to find sets of homologous contigs which represent the two haplotypes. For this, genes that map exactly twice to the unphased assembly are used as phasing markers to assign homologous contigs into diploid scaffold bins $$Bin_1,...,Bin_n$$. 
+A gene binning step is used to find sets of homologous contigs which represent the two haplotypes. For this, genes that map exactly twice to the unphased assembly are used as phasing markers to assign homologous contigs into diploid scaffold bins *Bin_1,...,Bin_n*. 

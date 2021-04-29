@@ -33,3 +33,8 @@ We use a graph based on Hi-C links between the scaffold bins, ignoring Hi-C link
 This step requires some manual work at the moment. For each contig in the scaffold bins, we visualized the proportion of Hi-C contacts to haploypes A and B for each scaffold bin. As an example, see below contig tig00000828 from a HiCanu assembly and its associated haplotig alignments. Contig tig00000828 appears to switch phase at ~1.5-3.7 Mb, which overlaps with the corresponding haplotig alignment start and end points.
 
 <img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000828.png" width="50%" height="50%">
+
+### Step4: After fixing phase switches, run the pipeline again with the updated genome
+
+### Step5: Obtain phased haplotypes
+

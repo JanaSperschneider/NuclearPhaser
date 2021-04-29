@@ -81,4 +81,41 @@ match   mis-    rep.    N's     Q gap   Q gap   T gap   T gap   strand  Q       
 
 You can see here that gene PTTG_25073T0 will act like a phasing marker as it has two hits exactly to contigs tig00000821 and tig00000656.
 
-Second, you need a full table of BUSCO hits (https://busco.ezlab.org/). Note that we have tested BUSCO v3 only and the latest BUSCO output format might be incompatible.
+Second, you need a full table of BUSCO hits (https://busco.ezlab.org/). Note that we have tested BUSCO v3 only and the latest BUSCO output format might be incompatible. For example:
+
+```
+run_BUSCO.py -i ${genome} -o buscov3_clean_assembly -l basidiomycota_odb9 -m geno -sp coprinus -c4
+```
+
+The output should look like this:
+```
+head full_table_buscov3_clean_assembly.tsv
+
+# BUSCO version is: 3.1.0
+# The lineage dataset is: basidiomycota_odb9 (Creation date: 2016-02-13, number of species: 25, number of BUSCOs: 1335)
+# To reproduce this run: python /apps/busco/3.1.0/scripts/run_BUSCO.py -i Pt_Clean_Genome.fasta -o buscov3_clean_assembly -l basidiomycota_odb9/ -m genome -c 4 -sp coprinus
+#
+# Busco id      Status  Contig  Start   End     Score   Length
+EOG092R000C     Duplicated      tig00000348     6772572 6790264 2620.1  2401
+EOG092R000C     Duplicated      tig00001348     188359  205921  2621.3  2402
+EOG092R000I     Duplicated      tig00000129     7090796 7107677 2028.3  1919
+EOG092R000I     Duplicated      tig00001352     223668  240549  2028.4  1919
+```
+You can see here that duplicated BUSCOs will also act like a phasing marker as they have two hits exactly to two contigs.
+
+Third, you need a Hi-C contact map in ginteractions format. We recommend following the HiC-Pro pipeline (https://github.com/nservant/HiC-Pro) and then converting the h5 format to ginteractions with hicexplorer (https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html).
+
+We also recommend to set MAPQ=30 in the HiC-Pro config file and to obtain a matrix at resolution 20,000 bps.
+
+Your Hi-C contact map output file in ginteractions format should look like this:
+
+```
+head HiC_MAPQ30.clean_assembly.20000.matrix.tsv
+tig00000001     0       20000   tig00000001     0       20000   27.008251
+tig00000001     0       20000   tig00000001     20000   40000   2.989856
+tig00000001     0       20000   tig00000001     40000   60000   1.906241
+tig00000001     0       20000   tig00000001     180000  200000  0.653958
+tig00000001     0       20000   tig00000001     9280000 9300000 0.435236
+tig00000001     0       20000   tig00000171     3740000 3760000 0.550744
+tig00000001     0       20000   tig00000286     0       20000   0.415017
+```

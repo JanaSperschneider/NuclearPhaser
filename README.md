@@ -174,8 +174,9 @@ Recommended to do a DGenies dot-plot alignment of these two files at this stage 
 ----------------------------------------
 ```
 
-In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 contigs with a total length of 240.5 MB. Also, in this example the Hi-C phasing signal is clear and the scaffold bins were phased into two haplotypes. It is a good idea to visualize the two scaffold bin haplotypes to see if the dot plot has nice synteny.
+In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 contigs with a total length of 240.5 MB. Also, in this example the Hi-C phasing signal is clear and the scaffold bins were phased into two haplotypes. It is a good idea to visualize the two scaffold bin haplotypes to see if the dot plot has nice synteny. Here we use Dgenies (http://dgenies.toulouse.inra.fr/) for visualization.
 
 <img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/map_Haplotype_1_genephasing_to_Haplotype_0_genephasing.png" width="25%" height="25%">
 
+**Note that if you get more than two haplotypes at this stages, your data does not support that this is a dikaryon. This could be because of extensive phase switches, collapsed regions or the presence of contaminants. We are planning to add support for other ploidys in the future.** 
 

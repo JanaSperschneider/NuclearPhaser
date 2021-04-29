@@ -4,8 +4,8 @@
   * [Overview of the method](#overview-of-the-method)
   * [Prerequisites for running NuclearPhaser](#prerequisites-for-running-nuclearphaser)
   * [High-level overview for running NuclearPhaser](#high-level-overview-for-running-nuclearphaser)
-  * 
-### Background (#background)
+  * [Detailed instructions for running NuclearPhaser](#detailed-instructions-for-running-nuclearphaser)
+### Background
 Most animals and plants have more than one set of chromosomes and package these haplotypes into a single nucleus, usually most often diploid, within each cell. In contrast, many fungal species carry multiple haploid nuclei per cell. Rust fungi are such species with two nuclei (karyons) that contain a full set of haploid chromosomes each. This dikaryotic state has advantages for haplotype phase separation using Hi-C chromatin contact information as the two haplotypes are physically separated. It also means that, unlike in diploids, Hi-C chromatin contacts between haplotypes are false positive signals. 
 
 ### Overview of the method

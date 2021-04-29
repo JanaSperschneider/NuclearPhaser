@@ -27,26 +27,26 @@ The following software needs to be installed:
 
 ### High-level overview for running NuclearPhaser
 
-## Step1: Construct a highly confident subset of the two haplotypes that are expected to reside in separate nuclei
+#### Step1: Construct a highly confident subset of the two haplotypes that are expected to reside in separate nuclei
 
 A gene binning step is used to find sets of homologous contigs which represent the two haplotypes. For this, genes that map exactly twice to the unphased assembly are used as phasing markers to assign homologous contigs into diploid scaffold bins *Bin_1,...,Bin_n*. Scaffold bins are constructed with a graph network approach where nodes are contigs and edges are the number of shared genes per Mb. Each strongly connected community in the graph is a diploid scaffold bin *Bin_x* and contains two subsets *Bin_xa* and *Bin_xb*. Thus, a scaffold bin is part of a chromosome where the two subsets represent the haplotypes. 
 
-## Step2: Separate the binned contigs into two haplotype sets representing their nuclear origin  
+#### Step2: Separate the binned contigs into two haplotype sets representing their nuclear origin  
 
 We use a graph based on Hi-C links between the scaffold bins, ignoring Hi-C links within scaffold bins for preliminary phasing. A graph network approach **should** return the two expected communities that represent a high proportion of the phased haplotypes, but might still include phase switches. Note that if you get more than two haplotypes in this step the pipeline will stop. It is likely you have either an assembly with too many phase switches or you have contaminant contigs in your assembly (e.g. plant or bacterial).
 
-## Step3: Fix phase switches in the two haplotype sets
+#### Step3: Fix phase switches in the two haplotype sets
 
 This step requires some manual work at the moment. For each contig in the scaffold bins, we visualized the proportion of Hi-C contacts to haploypes A and B for each scaffold bin. As an example, see below contig tig00000828 from a HiCanu assembly and its associated haplotig alignments. Contig tig00000828 appears to switch phase at ~1.5-3.7 Mb, which overlaps with the corresponding haplotig alignment start and end points.
 
 <img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000828.png" width="50%" height="50%">
 
-## Step4: After fixing phase switches, run the pipeline again with the updated genome
+#### Step4: After fixing phase switches, run the pipeline again with the updated genome
 After correction of phase switches, the input files (Gene mapping, BUSCO table & Hi-C contact map) need to be re-generated with the genome that has the phase switches corrected.
 
-## Step5: Obtain phased haplotypes
+#### Step5: Obtain phased haplotypes
 At the very end, NuclearPhaser will return the two haplotype sets in FASTA format.
 
 ### Detailed instructions for running NuclearPhaser
 
-## Step0: Generate all required input files
+#### Step0: Generate all required input files

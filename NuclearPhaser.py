@@ -804,7 +804,7 @@ for contig, length in LENGTHS.items():
       		output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
       	else:
       		output += '\t' + '0.0' + '\t' + '0.0' + '\n'   
-      f_alignments.writelines(output)
+      	f_alignments.writelines(output)
       f_alignments.close()
 #--------------------------------------
 #--------------------------------------

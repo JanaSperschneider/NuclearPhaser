@@ -119,3 +119,57 @@ tig00000001     0       20000   tig00000001     9280000 9300000 0.435236
 tig00000001     0       20000   tig00000171     3740000 3760000 0.550744
 tig00000001     0       20000   tig00000286     0       20000   0.415017
 ```
+
+#### Step1: Run NuclearPhaser
+
+Now you are ready to run the phasing pipeline like so:
+```
+python NuclearPhaser.py Pt_Clean_Genome_GeneMapping.txt full_table_buscov3_clean_assembly.tsv HiC_MAPQ30.clean_assembly.20000.matrix.tsv ${genome} /path_to_output_dir/Genome_Phasing_Output/
+```
+
+You should get an output like this:
+```
+Run minimap2
+[M::mm_idx_gen::4.708*1.47] collected minimizers
+[M::mm_idx_gen::5.214*1.69] sorted minimizers
+[M::main::5.214*1.69] loaded/built the index for 600 target sequence(s)
+[M::mm_mapopt_update::5.363*1.67] mid_occ = 343
+[M::mm_idx_stat] kmer size: 19; skip: 19; is_hpc: 0; #seq: 600
+[M::mm_idx_stat::5.467*1.66] distinct minimizers: 8631579 (16.13% are singletons); average occurrences: 2.975; average spacing: 9.988
+[M::worker_pipeline::58.309*3.48] mapped 600 sequences
+[M::main] Version: 2.16-r922
+[M::main] CMD: minimap2 -k19 -w19 -m200 -DP -r1000 -t4 -o /path_to_output_dir/Genome_Phasing_Output/temp.paf genome.clean.fasta genome.clean.fasta
+[M::main] Real time: 58.356 sec; CPU: 202.880 sec; Peak RSS: 3.928 GB
+Minimap2 alignments are finished, now scan the paf file.
+Done scanning the PAF alignment file.
+Now find haplotigs
+Mean alignment length is: 16528.201507812657
+Find contig pairs that share genes.
+Read in contact map
+Hi-C contact matrix has resolution: 20000
+Done
+Construct graph from contig pairs to find well-connected groups
+Construct community
+Use 26 gene bins.
+
+Contigs in bins: 193 with a total length of 240.48791 MB
+Still unphased: 407 contigs with a total length of 15.975574 MB
+
+Construct graph to phase the gene bins with Hi-C data
+
+Construct community to phase gene bins into the haplotypes
+----------
+----------
+Haplotype_0 ['Bin_10a', 'Bin_11b', 'Bin_12a', 'Bin_13a', 'Bin_14b', 'Bin_15a', 'Bin_16a', 'Bin_17a', 'Bin_18b', 'Bin_19b', 'Bin_1a', 'Bin_20a', 'Bin_21b', 'Bin_22a', 'Bin_23a', 'Bin_24a', 'Bin_25b', 'Bin_26a', 'Bin_2b', 'Bin_3b', 'Bin_4a', 'Bin_5a', 'Bin_6a', 'Bin_7b', 'Bin_8b', 'Bin_9a']
+120.424197 MB
+----------
+----------
+Haplotype_1 ['Bin_10b', 'Bin_11a', 'Bin_12b', 'Bin_13b', 'Bin_14a', 'Bin_15b', 'Bin_16b', 'Bin_17b', 'Bin_18a', 'Bin_19a', 'Bin_1b', 'Bin_20b', 'Bin_21a', 'Bin_22b', 'Bin_23b', 'Bin_24b', 'Bin_25a', 'Bin_26b', 'Bin_2a', 'Bin_3a', 'Bin_4b', 'Bin_5b', 'Bin_6b', 'Bin_7a', 'Bin_8a', 'Bin_9b']
+120.063713 MB
+----------
+----------------------------------------
+Recommended to do a DGenies dot-plot alignment of these two files at this stage to confirm that the gene binning & phasing went well:
+/path_to_output_dir/Genome_Phasing_Output/Haplotype_0_genephasing.fasta
+/path_to_output_dir/Genome_Phasing_Output/Haplotype_1_genephasing.fasta
+----------------------------------------
+```

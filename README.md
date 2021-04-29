@@ -5,6 +5,7 @@
   * [Prerequisites for running NuclearPhaser](#prerequisites-for-running-nuclearphaser)
   * [High-level overview for running NuclearPhaser](#high-level-overview-for-running-nuclearphaser)
   * [Detailed instructions for running NuclearPhaser](#detailed-instructions-for-running-nuclearphaser)
+  
 ### Background
 Most animals and plants have more than one set of chromosomes and package these haplotypes into a single nucleus, usually most often diploid, within each cell. In contrast, many fungal species carry multiple haploid nuclei per cell. Rust fungi are such species with two nuclei (karyons) that contain a full set of haploid chromosomes each. This dikaryotic state has advantages for haplotype phase separation using Hi-C chromatin contact information as the two haplotypes are physically separated. It also means that, unlike in diploids, Hi-C chromatin contacts between haplotypes are false positive signals. 
 
@@ -50,3 +51,14 @@ At the very end, NuclearPhaser will return the two haplotype sets in FASTA forma
 ### Detailed instructions for running NuclearPhaser
 
 #### Step0: Generate all required input files
+NuclearPhaser needs three input files and the clean genome assembly FASTA file. 
+
+First, generate the gene hit table with [biokanga] (https://github.com/csiro-crop-informatics/biokanga). You need a set of transcripts/genes for your species. This can come from previously published genome annotations, or it can be a gene set from a closely related species. You want to find genes that are highly conserved and occur exactly twice, think of it as housekeeping genes or 'haplotype phasing markers'. For example:
+
+```
+genome="Pt_Clean_Genome.fasta"
+genes="Puctr1_GeneCatalog_transcripts_20131203.nt.fasta"
+
+biokanga index --threads=4 -i ${genome} -o biokanga_index -r gene_mapping
+biokanga blitz --sensitivity=2 --mismatchscore=1 --threads=4 -o Pt_Clean_Genome_GeneMapping.txt --in=${genes} --sfx=biokanga_index
+```

@@ -173,3 +173,9 @@ Recommended to do a DGenies dot-plot alignment of these two files at this stage 
 /path_to_output_dir/Genome_Phasing_Output/Haplotype_1_genephasing.fasta
 ----------------------------------------
 ```
+
+In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 contigs with a total length of 240.5 MB. Also, in this example the Hi-C phasing signal is clear and the scaffold bins were phased into two haplotypes. It is a good idea to visualize the two scaffold bin haplotypes to see if the dot plot has nice synteny.
+
+<img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/map_Haplotype_1_genephasing_to_Haplotype_0_genephasing.png" width="25%" height="25%">
+
+

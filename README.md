@@ -203,3 +203,21 @@ Haplotype 1 contigs - contact to haplotype 0: [33.02, 29.41, 21.26, 29.96, 31.66
 In the first example (Bin_1), there are likely phase switches in contig tig00000348. Some of the associated haplotigs alternate in haplotype assignment, indicating that these regions need to be corrected for phase switching.
 
 The second example (Bin_16) appears fine, contig tig00000533 has 80.61% of its Hi-C contacts to haplotype 0 and the associated haplotigs do not alternate in phase assignment.
+
+NuclearPhaser produces output files for each suspect phase switch contig that can be used for determining where the phase switch breakpoints are. For example:
+```
+head tig00000348_HiC_Contacts.txt
+
+0       20000   |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*******    92.63   0.07    6.87    0.55
+40000   60000   |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*******    92.7    0.07    5.6     0.44
+60000   80000   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||    100.0   0.0     7.55    0
+80000   100000  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||    100.0   0.0     1.64    0
+100000  120000  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||***********    88.82   0.11    4.97    0.63
+120000  140000  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||    100.0   0.0     13.91   0
+140000  160000  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*    99.06   0.01    7.03    0.07
+160000  180000  ||||||||||||||||||||||||||||||**********************************************************************    29.78   0.7     1.49    3.51
+180000  200000  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||    100.0   0.0     1.34    0
+200000  220000  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||    100.0   0.0     13.0    0
+```
+
+Here, the contig is divided into 20,000 kb bins in line with the Hi-C contact map. For each bin, the Hi-C contacts to haplotypes 0 and 1 are summarized and visualized. Column 4 is % of Hi-C contacts to haplotype 0, column 5 is % of Hi-C contacts to haplotype 1, column 6 is normalized Hi-C contact frequency to haplotype 0 and column 7 is normalized Hi-C contact frequency to haplotype 1. This information can also be visualized with the provided R script PhaseSwaps.R.

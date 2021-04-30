@@ -180,7 +180,7 @@ In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 cont
 
 **Note that if you get more than two haplotypes at this stages, your data does not support that this is a dikaryon. This could be because of extensive phase switches, collapsed regions or the presence of contaminants. We are planning to add support for other ploidys in the future.** 
 
-#### Step2: Correct phase switched in the gene bins
+#### Step2: Correct phase switches in the gene bins
 
 It is very likely that you will see phase switches, even in HiFi assemblies. We found that if a contig has >80% of its Hi-C contacts to one of the haplotypes, it is phased correctly. If it has e.g. 60% of its Hi-C contacts to haplotype 0 and 40% of its Hi-C contacts to haplotype 1, it likely contains phase switches. NuclearPhaser now goes through the gene bins and prints the Hi-C contact frequencies for each like so:
 
@@ -224,7 +224,7 @@ Here, the contig is divided into 20,000 kb bins in line with the Hi-C contact ma
 
 <img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000348.png" width="50%" height="50%">
 
-In this example, the phase switch in contig tig00000348 at genomic coordinate ~2.75 is visible. Looking at the haplotig alignment coordinates, the phase switch breakpoint can be pin-pointed to genomic coordinate 2820716-2811038, where tig00000399 switches phase to haplotype 0 (81.53% of Hi-C contacts are to haplotype 0).
+In this example, the phase switch in contig tig00000348 at genomic coordinate ~2.75 is visible. Looking at the haplotig alignment coordinates, the phase switch breakpoint can be pin-pointed to genomic coordinate 2820716-2811038, where tig00000399 switches phase to haplotype 0 (81.53% of Hi-C contacts are to haplotype 0). To break the contig, you could use samtools faidx. It is recommended procedure to investigate all the gene bins for phase switches and correct those. 
 
 ```
 cat tig00000348_Haplotigs.txt
@@ -261,6 +261,9 @@ tig00001348     6880708 6943015 80.08   19.92
 tig00001348     6964312 7005418 80.08   19.92
 tig00001348     7038671 7130148 80.08   19.92
 tig00001348     7149873 7211901 80.08   19.92
-
 ```
+
+#### Step3: Run NuclearPhaser again with an assembly where phase switches have been corrected
+
+
 

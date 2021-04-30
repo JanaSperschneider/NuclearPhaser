@@ -265,5 +265,10 @@ tig00001348     7149873 7211901 80.08   19.92
 
 #### Step3: Run NuclearPhaser again with an assembly where phase switches have been corrected
 
+At this stage you have to re-generate the three input files (with biokanga blitz, BUSCO, HiC-Pro) and provide the clean, phase switch-corrected genome assembly FASTA file.
 
+Then run NuclearPhaser again:
 
+```
+python NuclearPhaser.py Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv ${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
+```

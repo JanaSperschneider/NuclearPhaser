@@ -279,7 +279,7 @@ ${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_Phase
 
 This should now run to completion with two phased haplotypes and the remaining unplaced contigs as the final output.
 
-### Running the toy example
+### Running the toy example (in progress)
 A toy example data set is provided to test NuclearPhaser.
 
 First unzip the genome file and then run NuclearPhaser:

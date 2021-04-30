@@ -174,7 +174,7 @@ Recommended to do a DGenies dot-plot alignment of these two files at this stage 
 ----------------------------------------
 ```
 
-In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 contigs with a total length of 240.5 MB. Also, in this example the Hi-C phasing signal is clear and the scaffold bins were phased into two haplotypes. It is a good idea to visualize the two scaffold bin haplotypes to see if the dot plot has nice synteny. Here we use Dgenies (http://dgenies.toulouse.inra.fr/) for visualization.
+In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 contigs with a total length of 240.5 MB. Also, in this example the Hi-C phasing signal is clear and the scaffold bins were phased into two haplotypes (Haplotype_0_genephasing.fasta and Haplotype_1_genephasing.fasta). It is a good idea to visualize the two preliminary haplotypes to see if the dot plot has nice synteny. Here we use Dgenies (http://dgenies.toulouse.inra.fr/) for visualization.
 
 <img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/map_Haplotype_1_genephasing_to_Haplotype_0_genephasing.png" width="25%" height="25%">
 
@@ -182,7 +182,7 @@ In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 cont
 
 #### Step2: Correct phase switched in the gene bins
 
-It is very likely that you will see phase switches, even in HiFi assemblies. NuclearPhaser prints the Hi-C contact frequencies for each gene bin like so:
+It is very likely that you will see phase switches, even in HiFi assemblies. We found that if a contig has >80% of its Hi-C contacts to one of the haplotypes, it is phased correctly. If it has e.g. 60% of its Hi-C contacts to haplotype 0 and 40% of its Hi-C contacts to haplotype 1, it likely contains phase switches. NuclearPhaser now goes through the gene bins and prints the Hi-C contact frequencies for each like so:
 
 ```
 ------- Hi-C contacts in this bin Bin_1 -------
@@ -192,4 +192,14 @@ Haplotype 1 contigs: ['tig00000355', 'tig00000379', 'tig00000399', 'tig00000403'
 Haplotype 0 contigs - contact to haplotype 0: [54.43]
 Haplotype 1 contigs - contact to haplotype 0: [66.56, 2.59, 18.47, 62.35, 100.0, 18.5, 13.78, 4.45, 19.92, 3.77]
 
+------- Hi-C contacts in this bin Bin_16 -------
+Bin_16
+Haplotype 0 contigs: ['tig00000533']
+Haplotype 1 contigs: ['tig00000807', 'tig00001197', 'tig00001205', 'tig00001218', 'tig00001403']
+Haplotype 0 contigs - contact to haplotype 0: [80.61]
+Haplotype 1 contigs - contact to haplotype 0: [33.02, 29.41, 21.26, 29.96, 31.66]
 ```
+
+In the first example (Bin_1), there are likely phase switches in contig tig00000348. Some of the associated haplotigs alternate in haplotype assignment, indicating that these regions need to be corrected for phase switching.
+
+The second example (Bin_16) appears fine, contig tig00000533 has 80.61% of its Hi-C contacts to haplotype 0 and the associated haplotigs do not alternate in phase assignment.

@@ -281,3 +281,8 @@ This should now run to completion with two phased haplotypes and the remaining u
 
 ### Running the toy example
 A toy example data set is provided to test NuclearPhaser.
+
+First unzip the genome file and then run NuclearPhaser:
+```
+ 
+```

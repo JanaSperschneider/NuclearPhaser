@@ -229,7 +229,7 @@ def check_haplotype_assignment(HAPLOTYPE_BINS, THRESHOLD_HIC_PERCENT, THRESHOLD_
 
     if total_contacts > THRESHOLD_HIC_COUNT:
       if haplotype_1_contacts > haplotype_0_contacts and 100.0*haplotype_1_contacts/total_contacts > THRESHOLD_HIC_PERCENT:  
-        print(contig, 'Haplotype_0 is wrongly assigned', 100.0*haplotype_0_contacts/total_contacts, 100.0*haplotype_1_contacts/total_contacts, total_contacts, LENGTHS[contig])
+        #print(contig, 'Haplotype_0 is wrongly assigned.', 100.0*haplotype_0_contacts/total_contacts, 100.0*haplotype_1_contacts/total_contacts, '(', LENGTHS[contig], 'bps)')
         assigned_to_wrong_haplotype += 1
         haplotype1_updated.append(contig)
       else:
@@ -251,7 +251,7 @@ def check_haplotype_assignment(HAPLOTYPE_BINS, THRESHOLD_HIC_PERCENT, THRESHOLD_
 
     if total_contacts > THRESHOLD_HIC_COUNT:
       if haplotype_0_contacts > haplotype_1_contacts and 100.0*haplotype_0_contacts/total_contacts > THRESHOLD_HIC_PERCENT: 
-        print(contig, 'Haplotype_1 is wrongly assigned', 100.0*haplotype_0_contacts/total_contacts, 100.0*haplotype_1_contacts/total_contacts, total_contacts, LENGTHS[contig])
+        #print(contig, 'Haplotype_1 is wrongly assigned', 100.0*haplotype_0_contacts/total_contacts, 100.0*haplotype_1_contacts/total_contacts, '(', LENGTHS[contig], 'bps)')
         assigned_to_wrong_haplotype += 1
         haplotype0_updated.append(contig)
       else:
@@ -259,7 +259,7 @@ def check_haplotype_assignment(HAPLOTYPE_BINS, THRESHOLD_HIC_PERCENT, THRESHOLD_
     else:
       haplotype1_updated.append(contig)
 
-  print(100.0*assigned_to_wrong_haplotype/(len(haplotype0) + len(haplotype1)), 'appear wrongly assigned.')
+  #print(100.0*assigned_to_wrong_haplotype/(len(haplotype0) + len(haplotype1)), 'percent of contigs appear wrongly assigned.')
 
   return haplotype0_updated, haplotype1_updated
 #--------------------------------------
@@ -367,7 +367,7 @@ def print_haplotype_assignment(HAPLOTYPE_BINS, THRESHOLD_HIC_COUNT, OUTPUT_FILE_
       output_string += contig + '\t' + 'Haplotype_1' + '\t' + str(100.0*haplotype_0_contacts/total_contacts) + '\t' 
       output_string += str(100.0*haplotype_1_contacts/total_contacts) + '\t' + str(total_contacts) + '\t' + str(LENGTHS[contig]) + '\n'
 
-  print(output_string)
+  #print(output_string)
 
   if OUTPUT_FILE_WITHOUT_ALLELIC != None:
     f = open(OUTPUT_DIRECTORY_PATH + '/' + OUTPUT_FILE_WITHOUT_ALLELIC, 'w')
@@ -709,8 +709,8 @@ for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
     haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
     total_contacts = haplotype_0_contacts + haplotype_1_contacts
     if total_contacts > 0.0:
-      haplotype_0_contacts_bin_a.append(100.0*haplotype_0_contacts/total_contacts)
-      haplotype_1_contacts_bin_a.append(100.0*haplotype_1_contacts/total_contacts)
+      haplotype_0_contacts_bin_a.append(round(100.0*haplotype_0_contacts/total_contacts,2))
+      haplotype_1_contacts_bin_a.append(round(100.0*haplotype_1_contacts/total_contacts,2))
     else:
       haplotype_0_contacts_bin_a.append(0.0)
       haplotype_1_contacts_bin_a.append(0.0)     
@@ -720,29 +720,29 @@ for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
     haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
     total_contacts = haplotype_0_contacts + haplotype_1_contacts
     if total_contacts > 0.0:    
-      haplotype_0_contacts_bin_b.append(100.0*haplotype_0_contacts/total_contacts)
-      haplotype_1_contacts_bin_b.append(100.0*haplotype_1_contacts/total_contacts)
+      haplotype_0_contacts_bin_b.append(round(100.0*haplotype_0_contacts/total_contacts,2))
+      haplotype_1_contacts_bin_b.append(round(100.0*haplotype_1_contacts/total_contacts,2))
     else:
       haplotype_0_contacts_bin_b.append(0.0)
       haplotype_1_contacts_bin_b.append(0.0)  
 
   print('------- Hi-C contacts in this bin', gene_bin, '-------')
   print(gene_bin)
-  print('Haplotype A contigs:', contigs_a)
-  print('Haplotype B contigs:', contigs_b)
-  print('Haplotype A contigs - contact to haplotype 0:', haplotype_0_contacts_bin_a)
-  print('Haplotype B contigs - contact to haplotype 0:', haplotype_0_contacts_bin_b)
+  print('Haplotype 0 contigs:', contigs_a)
+  print('Haplotype 1 contigs:', contigs_b)
+  print('Haplotype 0 contigs - contact to haplotype 0:', haplotype_0_contacts_bin_a)
+  print('Haplotype 1 contigs - contact to haplotype 0:', haplotype_0_contacts_bin_b)
   print()  
 
 print('----------------------------------------')  
 print('At this stage it is advised to break phase switches in the gene bins')
 print('----------------------------------------')
 #--------------------------------------
-# Produce plots for each contig (> 500 Kb) that visualize phase switches
+# Produce plots for each contig (> 1Mb) that visualize phase switches
 PHASESWITCH_CANDIDATES = []
 
 for contig, length in LENGTHS.items():
-  if length > 500000:
+  if length > 1000000:
 
     haplotype_0_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
     haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
@@ -779,6 +779,7 @@ for contig, length in LENGTHS.items():
     				output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
     				output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))]) 
     				output += '\t' 
+    				output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(haplotype_1_contacts/total_contacts,2)) + '\t'
     				output += str(round(haplotype_0_contacts,2)) + '\t' + str(round(haplotype_1_contacts,2)) + '\n'
     				f.writelines(output)
     			else:

@@ -221,3 +221,6 @@ head tig00000348_HiC_Contacts.txt
 ```
 
 Here, the contig is divided into 20,000 kb bins in line with the Hi-C contact map. For each bin, the Hi-C contacts to haplotypes 0 and 1 are summarized and visualized. Column 4 is % of Hi-C contacts to haplotype 0, column 5 is % of Hi-C contacts to haplotype 1, column 6 is normalized Hi-C contact frequency to haplotype 0 and column 7 is normalized Hi-C contact frequency to haplotype 1. This information can also be visualized with the provided R script PhaseSwaps.R.
+
+<img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000348.png" width="25%" height="25%">
+

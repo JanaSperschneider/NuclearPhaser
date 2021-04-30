@@ -120,7 +120,7 @@ tig00000001     0       20000   tig00000171     3740000 3760000 0.550744
 tig00000001     0       20000   tig00000286     0       20000   0.415017
 ```
 
-#### Step1: Run NuclearPhaser
+#### Step1: Run NuclearPhaser: gene binning & phasing of the gene bins
 
 Now you are ready to run the phasing pipeline like so:
 ```
@@ -180,3 +180,16 @@ In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 cont
 
 **Note that if you get more than two haplotypes at this stages, your data does not support that this is a dikaryon. This could be because of extensive phase switches, collapsed regions or the presence of contaminants. We are planning to add support for other ploidys in the future.** 
 
+#### Step2: Correct phase switched in the gene bins
+
+It is very likely that you will see phase switches, even in HiFi assemblies. NuclearPhaser prints the Hi-C contact frequencies for each gene bin like so:
+
+```
+------- Hi-C contacts in this bin Bin_1 -------
+Bin_1
+Haplotype 0 contigs: ['tig00000348']
+Haplotype 1 contigs: ['tig00000355', 'tig00000379', 'tig00000399', 'tig00000403', 'tig00000405', 'tig00001076', 'tig00001316', 'tig00001323', 'tig00001348', 'tig00001450']
+Haplotype 0 contigs - contact to haplotype 0: [54.43]
+Haplotype 1 contigs - contact to haplotype 0: [66.56, 2.59, 18.47, 62.35, 100.0, 18.5, 13.78, 4.45, 19.92, 3.77]
+
+```

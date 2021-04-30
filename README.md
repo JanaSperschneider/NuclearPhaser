@@ -124,7 +124,8 @@ tig00000001     0       20000   tig00000286     0       20000   0.415017
 
 Now you are ready to run the phasing pipeline like so:
 ```
-python NuclearPhaser.py Pt_Clean_Genome_GeneMapping.txt full_table_buscov3_clean_assembly.tsv HiC_MAPQ30.clean_assembly.20000.matrix.tsv ${genome} /path_to_output_dir/Genome_Phasing_Output/
+python NuclearPhaser.py Pt_Clean_Genome_GeneMapping.txt full_table_buscov3_clean_assembly.tsv \
+HiC_MAPQ30.clean_assembly.20000.matrix.tsv ${genome} /path_to_output_dir/Genome_Phasing_Output/
 ```
 
 You should get an output like this:
@@ -270,5 +271,7 @@ At this stage you have to re-generate the three input files (with biokanga blitz
 Then run NuclearPhaser again:
 
 ```
-python NuclearPhaser.py Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv ${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
+python NuclearPhaser.py Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt \
+full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv \
+${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
 ```

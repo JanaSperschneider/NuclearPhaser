@@ -284,5 +284,8 @@ A toy example data set is provided to test NuclearPhaser.
 
 First unzip the genome file and then run NuclearPhaser:
 ```
- 
+cd ToyExample/
+unzip genome_example.zip
+
+python ../NuclearPhaser.py
 ```

@@ -738,11 +738,11 @@ print('----------------------------------------')
 print('At this stage it is advised to break phase switches in the gene bins')
 print('----------------------------------------')
 #--------------------------------------
-# Produce plots for each contig (> 200 Kb) that visualize phase switches
+# Produce plots for each contig (> 500 Kb) that visualize phase switches
 PHASESWITCH_CANDIDATES = []
 
 for contig, length in LENGTHS.items():
-  if length > 200000:
+  if length > 500000:
 
     haplotype_0_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
     haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])

@@ -222,5 +222,45 @@ head tig00000348_HiC_Contacts.txt
 
 Here, the contig is divided into 20,000 kb bins in line with the Hi-C contact map. For each bin, the Hi-C contacts to haplotypes 0 and 1 are summarized and visualized. Column 4 is % of Hi-C contacts to haplotype 0, column 5 is % of Hi-C contacts to haplotype 1, column 6 is normalized Hi-C contact frequency to haplotype 0 and column 7 is normalized Hi-C contact frequency to haplotype 1. This information can also be visualized with the provided R script PhaseSwaps.R.
 
-<img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000348.png" width="25%" height="25%">
+<img src="https://github.com/JanaSperschneider/NuclearPhaser/blob/main/tig00000348.png" width="50%" height="50%">
+
+In this example, the phase switch in contig tig00000348 at genomic coordinate ~2.75 is visible. Looking at the haplotig alignment coordinates, the phase switch breakpoint can be pin-pointed to genomic coordinate 2820716-2811038, where tig00000399 switches phase to haplotype 0 (81.53% of Hi-C contacts are to haplotype 0).
+
+```
+cat tig00000348_Haplotigs.txt
+tig00000355     7686    47594   33.44   66.56
+tig00000355     97768   170161  33.44   66.56
+tig00000355     190087  518405  33.44   66.56
+tig00000355     535249  802073  33.44   66.56
+tig00000403     878206  1292871 37.65   62.35
+tig00000403     1312712 1673905 37.65   62.35
+tig00000403     1712013 1759902 37.65   62.35
+tig00000403     1783891 1850210 37.65   62.35
+tig00000403     1871941 2065795 37.65   62.35
+tig00000403     2116860 2200863 37.65   62.35
+tig00000403     2256411 2704252 37.65   62.35
+tig00000405     2691390 2820716 0.0     100.0
+tig00000399     2811038 2834211 81.53   18.47
+tig00000406     2815726 2834211 0.0     0.0
+tig00000399     2852283 3518628 81.53   18.47
+tig00000956     3492943 3518628 0.0     0.0
+tig00000957     3492943 3518628 0.0     0.0
+tig00000399     3542287 4033740 81.53   18.47
+tig00000964     4018978 4048337 0.0     0.0
+tig00001450     4036980 4464822 96.23   3.77
+tig00001076     4454145 5255388 81.5    18.5
+tig00001076     5280040 5324405 81.5    18.5
+tig00002747     5306911 5333720 0.0     0.0
+tig00001316     5336761 5537559 86.22   13.78
+tig00001316     5572453 5968562 86.22   13.78
+tig00001316     6018731 6154952 86.22   13.78
+tig00001323     6137105 6582141 95.55   4.45
+tig00001337     6568058 6598726 0.0     0.0
+tig00001348     6600243 6857179 80.08   19.92
+tig00001348     6880708 6943015 80.08   19.92
+tig00001348     6964312 7005418 80.08   19.92
+tig00001348     7038671 7130148 80.08   19.92
+tig00001348     7149873 7211901 80.08   19.92
+
+```
 

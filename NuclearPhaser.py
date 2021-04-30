@@ -739,6 +739,8 @@ print('At this stage it is advised to break phase switches in the gene bins')
 print('----------------------------------------')
 #--------------------------------------
 # Produce plots for each contig (> 200 Kb) that visualize phase switches
+PHASESWITCH_CANDIDATES = []
+
 for contig, length in LENGTHS.items():
   if length > 200000:
 
@@ -747,65 +749,66 @@ for contig, length in LENGTHS.items():
 
     total_contacts = haplotype_0_contacts + haplotype_1_contacts
 
-    if 100.0*haplotype_1_contacts/total_contacts <= THRESHOLD_HIC_PERCENT and 100.0*haplotype_0_contacts/total_contacts <= THRESHOLD_HIC_PERCENT:   
-      f = open(OUTPUT_DIRECTORY_PATH + '/' + contig + '_HiC_Contacts.txt', 'w')
-      f_alignments = open(OUTPUT_DIRECTORY_PATH + '/' + contig + '_Haplotigs.txt', 'w')
+    if 100.0*haplotype_1_contacts/total_contacts <= THRESHOLD_HIC_PERCENT and 100.0*haplotype_0_contacts/total_contacts <= THRESHOLD_HIC_PERCENT:
+    	PHASESWITCH_CANDIDATES.append((contig, length))
+    	f = open(OUTPUT_DIRECTORY_PATH + '/' + contig + '_HiC_Contacts.txt', 'w')
+    	
+    	print('Potential phase switch in this contig:', contig, '(', length, ' bps)')#, round(100.0*haplotype_1_contacts/total_contacts,2), round(100.0*haplotype_0_contacts/total_contacts,2))
 
-      print('Potential phase switch in this contig:', contig, '(', length, ' bps)')#, round(100.0*haplotype_1_contacts/total_contacts,2), round(100.0*haplotype_0_contacts/total_contacts,2))
-      if contig in CONTACTS_PER_CONTIG:
-        contact_list = CONTACTS_PER_CONTIG[contig]
+    	if contig in CONTACTS_PER_CONTIG:
+    		contact_list = CONTACTS_PER_CONTIG[contig]
 
-        # First collect all trans contacts in each bin
-        CONTACTS_PER_BIN = {}
-        for (start, end, contig, freq) in contact_list:
-          bin_coordinates = (start, end)
-          if bin_coordinates in CONTACTS_PER_BIN:
-            CONTACTS_PER_BIN[bin_coordinates] = CONTACTS_PER_BIN[bin_coordinates] + [(contig, freq)]    
-          else:
-            CONTACTS_PER_BIN[bin_coordinates] = [(contig, freq)]
+    		# First collect all trans contacts in each bin
+    		CONTACTS_PER_BIN = {}
+    		for (start, end, contig, freq) in contact_list:
+    			bin_coordinates = (start, end)
+    			if bin_coordinates in CONTACTS_PER_BIN:
+    				CONTACTS_PER_BIN[bin_coordinates] = CONTACTS_PER_BIN[bin_coordinates] + [(contig, freq)]    
+    			else:
+    				CONTACTS_PER_BIN[bin_coordinates] = [(contig, freq)]
 
-        # Then print out the % of contacts to each haplotype for each bin
-        for (start, end), contact_list in sorted(CONTACTS_PER_BIN.items()):
-            haplotype_0_contacts = sum([freq for (contig, freq) in contact_list if contig in HAPLOTYPE_BINS['Haplotype_0']])
-            haplotype_1_contacts = sum([freq for (contig, freq) in contact_list if contig in HAPLOTYPE_BINS['Haplotype_1']])
+    		# Then print out the % of contacts to each haplotype for each bin
+    		for (start, end), contact_list in sorted(CONTACTS_PER_BIN.items()):
+    			haplotype_0_contacts = sum([freq for (contig, freq) in contact_list if contig in HAPLOTYPE_BINS['Haplotype_0']])
+    			haplotype_1_contacts = sum([freq for (contig, freq) in contact_list if contig in HAPLOTYPE_BINS['Haplotype_1']])
 
-            total_contacts = haplotype_0_contacts+haplotype_1_contacts
+    			total_contacts = haplotype_0_contacts+haplotype_1_contacts
 
-            if total_contacts > 0.0:
-              output = str(start) + '\t' + str(end) + '\t'
-              output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
-              output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))]) 
-              output += '\t' 
-              output += str(round(haplotype_0_contacts,2)) + '\t' + str(round(haplotype_1_contacts,2)) + '\n'
-              f.writelines(output)
-            else:
-              output = str(start) + '\t' + str(end) + '\n'
-              f.writelines(output)
+    			if total_contacts > 0.0:
+    				output = str(start) + '\t' + str(end) + '\t'
+    				output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
+    				output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))]) 
+    				output += '\t' 
+    				output += str(round(haplotype_0_contacts,2)) + '\t' + str(round(haplotype_1_contacts,2)) + '\n'
+    				f.writelines(output)
+    			else:
+    				output = str(start) + '\t' + str(end) + '\n'
+    				f.writelines(output)
+    	f.close()
 
-        f.close()
+for contig, length in PHASESWITCH_CANDIDATES:
+	f_alignments = open(OUTPUT_DIRECTORY_PATH + '/' + contig + '_Haplotigs.txt', 'w')
+	# Now print out the alignment coordinates for the haplotigs, too
+	ALIGNMENTS = []
+	for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
+		contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
+		if potential_haplotig_aligned > THRESHOLD_MIN_ALIGNMENT:
+			for (start, end) in merged_hits:
+				ALIGNMENTS.append((start, end, potential_haplotig))
 
-      # Now print out the alignment coordinates for the haplotigs, too
-      ALIGNMENTS = []
-      for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
-      	contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
-      	if potential_haplotig_aligned > THRESHOLD_MIN_ALIGNMENT:
-      		for (start, end) in merged_hits:
-      			ALIGNMENTS.append((start, end, potential_haplotig))
-      
-      for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
-      	haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
+	for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
+		haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
+		haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+		haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+		sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
+		output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
+		if sum_of_contacts > 0.0:
+			output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
+		else:
+			output += '\t' + '0.0' + '\t' + '0.0' + '\n'   
+		f_alignments.writelines(output)
+	f_alignments.close()
 
-      	haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-      	haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-      	sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
-
-      	output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
-      	if sum_of_contacts > 0.0:
-      		output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
-      	else:
-      		output += '\t' + '0.0' + '\t' + '0.0' + '\n'   
-      	f_alignments.writelines(output)
-      f_alignments.close()
 #--------------------------------------
 #--------------------------------------
 # Now place the remaining contigs based on synteny

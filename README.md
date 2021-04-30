@@ -275,3 +275,6 @@ python NuclearPhaser.py Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt \
 full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv \
 ${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
 ```
+
+This should now run to completion with two phased haplotypes and the remaining unplaced contigs as the final output.
+

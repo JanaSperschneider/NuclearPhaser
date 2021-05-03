@@ -287,5 +287,234 @@ First unzip the genome file and then run NuclearPhaser:
 cd ToyExample/
 unzip genome_example.zip
 
-python ../NuclearPhaser.py
+python ../NuclearPhaser.py GeneHits_genome_example.txt full_table_buscov3_genome_example.tsv HiC_MAPQ30.genome_example.20000.matrix.tsv genome_example.fasta /scratch1/spe12g/Testing/Phasing_Testing/
+
+Run minimap2
+[M::mm_idx_gen::1.170*1.01] collected minimizers
+[M::mm_idx_gen::1.282*1.26] sorted minimizers
+[M::main::1.282*1.26] loaded/built the index for 52 target sequence(s)
+[M::mm_mapopt_update::1.322*1.25] mid_occ = 91
+[M::mm_idx_stat] kmer size: 19; skip: 19; is_hpc: 0; #seq: 52
+[M::mm_idx_stat::1.348*1.24] distinct minimizers: 2279828 (20.90% are singletons); average occurrences: 2.267; average spacing: 9.994
+[M::worker_pipeline::5.031*2.82] mapped 52 sequences
+[M::main] Version: 2.16-r922
+[M::main] CMD: minimap2 -k19 -w19 -m200 -DP -r1000 -t4 -o /scratch1/spe12g/Testing/Phasing_Testing//temp.paf genome_example.fasta genome_example.fasta
+[M::main] Real time: 5.046 sec; CPU: 14.215 sec; Peak RSS: 0.868 GB
+Minimap2 alignments are finished, now scan the paf file.
+Done scanning the PAF alignment file.
+Now find haplotigs
+Mean alignment length is: 27507.875102040816
+Find contig pairs that share genes.
+Read in contact map
+Hi-C contact matrix has resolution: 20000
+Done
+Construct graph from contig pairs to find well-connected groups
+Construct community
+Use 5 gene bins.
+
+Contigs in bins: 51 with a total length of 51.612912 MB
+Still unphased: 1 contigs with a total length of 0.031332 MB
+
+Construct graph to phase the gene bins with Hi-C data
+
+Construct community to phase gene bins into the haplotypes
+----------
+----------
+Haplotype_0 ['Bin_1a', 'Bin_2b', 'Bin_3a', 'Bin_4a', 'Bin_5a']
+26.552015 MB
+----------
+----------
+Haplotype_1 ['Bin_1b', 'Bin_2a', 'Bin_3b', 'Bin_4b', 'Bin_5b']
+25.060897 MB
+----------
+----------------------------------------
+Recommended to do a DGenies dot-plot alignment of these two files at this stage to confirm that the gene binning & phasing went well:
+/scratch1/spe12g/Testing/Phasing_Testing//Haplotype_0_genephasing.fasta
+/scratch1/spe12g/Testing/Phasing_Testing//Haplotype_1_genephasing.fasta
+----------------------------------------
+Haplotype 0 length 26.552015 MB
+Haplotype 1 length 25.060897 MB
+Unphased contigs 0.031332 MB
+------- Hi-C contacts in this bin Bin_1 -------
+Bin_1
+Haplotype 0 contigs: ['tig00000001']
+Haplotype 1 contigs: ['tig00000004', 'tig00000046', 'tig00000059', 'tig00000077', 'tig00000091', 'tig00000098', 'tig00000116', 'tig00000127', 'tig00001493']
+Haplotype 0 contigs - contact to haplotype 0: [69.55]
+Haplotype 1 contigs - contact to haplotype 0: [11.3, 56.93, 29.55, 48.31, 14.5, 42.39, 79.97, 9.69, 10.9]
+
+------- Hi-C contacts in this bin Bin_2 -------
+Bin_2
+Haplotype 0 contigs: ['tig00000287']
+Haplotype 1 contigs: ['tig00000599', 'tig00000600', 'tig00000602', 'tig00000605', 'tig00000612', 'tig00000620', 'tig00000625', 'tig00000636', 'tig00000637', 'tig00000650']
+Haplotype 0 contigs - contact to haplotype 0: [29.58]
+Haplotype 1 contigs - contact to haplotype 0: [71.69, 63.84, 91.83, 0.0, 52.75, 82.65, 87.23, 73.71, 65.25, 86.9]
+
+------- Hi-C contacts in this bin Bin_3 -------
+Bin_3
+Haplotype 0 contigs: ['tig00000606']
+Haplotype 1 contigs: ['tig00000641']
+Haplotype 0 contigs - contact to haplotype 0: [52.6]
+Haplotype 1 contigs - contact to haplotype 0: [46.17]
+
+------- Hi-C contacts in this bin Bin_4 -------
+Bin_4
+Haplotype 0 contigs: ['tig00000286']
+Haplotype 1 contigs: ['tig00000290', 'tig00000294', 'tig00000295', 'tig00000297', 'tig00000303', 'tig00000308', 'tig00000318', 'tig00000332', 'tig00000339', 'tig00000767', 'tig00000952', 'tig00001116', 'tig00001162', 'tig00031848']
+Haplotype 0 contigs - contact to haplotype 0: [59.64]
+Haplotype 1 contigs - contact to haplotype 0: [35.0, 6.96, 57.81, 31.03, 33.61, 0.0, 7.89, 64.52, 19.88, 22.22, 3.65, 13.53, 23.66, 0.0]
+
+------- Hi-C contacts in this bin Bin_5 -------
+Bin_5
+Haplotype 0 contigs: ['tig00000699']
+Haplotype 1 contigs: ['tig00000704', 'tig00000705', 'tig00000729', 'tig00000740', 'tig00000745', 'tig00000756', 'tig00000760', 'tig00000762', 'tig00001001', 'tig00001391', 'tig00001411', 'tig00001416']
+Haplotype 0 contigs - contact to haplotype 0: [78.9]
+Haplotype 1 contigs - contact to haplotype 0: [0.0, 6.12, 35.35, 100.0, 0.0, 0.18, 0.0, 0.0, 23.57, 5.29, 7.85, 81.31]
+
+----------------------------------------
+At this stage it is advised to break phase switches in the gene bins
+----------------------------------------
+Potential phase switch in this contig: tig00000001 ( 9321276  bps)
+Potential phase switch in this contig: tig00000046 ( 1698592  bps)
+Potential phase switch in this contig: tig00000077 ( 2168510  bps)
+Potential phase switch in this contig: tig00000286 ( 7468728  bps)
+Potential phase switch in this contig: tig00000287 ( 3663278  bps)
+Potential phase switch in this contig: tig00000606 ( 1910973  bps)
+Potential phase switch in this contig: tig00000641 ( 1424325  bps)
+Potential phase switch in this contig: tig00000699 ( 4697996  bps)
+Potential phase switch in this contig: tig00001162 ( 1419579  bps)
+Unplaced contigs before synteny assignment: 1 0.031332 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+Unplaced contigs before synteny assignment: 0 0.0 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+Contigs have been placed based on synteny, now assign contigs with Hi-C
+--------------------------------------
+Round1
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+Round2
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+Now place the remaining contigs based on synteny
+--------------------------------------
+Round1
+Unplaced contigs before synteny assignment: 0 0.0 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+Round2
+Unplaced contigs before synteny assignment: 0 0.0 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+Contigs have been placed based on synteny, now assign contigs with Hi-C
+--------------------------------------
+Round1
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+Round2
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+Unplaced contigs before synteny assignment: 0 0.0 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+Unplaced contigs before synteny assignment: 0 0.0 MB
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 14
+Number of contigs in haplotype 1: 38
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 26552015 ( 26.552 Mb)
+Total length of haplotype 1 (bps): 25092229 ( 25.092 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+--------------------------------------
+
+Total number of contigs: 52
+Number of contigs in haplotype 0: 28
+Number of contigs in haplotype 1: 24
+Number of unphased contigs: 0
+
+Total length of haplotype 0 (bps): 38997750 ( 38.998 Mb)
+Total length of haplotype 1 (bps): 12646494 ( 12.646 Mb)
+Total length of unphased contigs (bps): 0 ( 0.0 Mb)
+--------------------------------------
+All done.
+--------------------------------------
 ```

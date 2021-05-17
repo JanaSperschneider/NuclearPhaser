@@ -9,13 +9,13 @@ import shutil
 import tempfile
 import operator
 from collections import defaultdict
-#--------------------------------------  
-#--------------------------------------  
+#--------------------------------------
+#--------------------------------------
 THRESHOLD_GENE_DENSITY = 30.0
 THRESHOLD_SHARED_GENES = 2.0
 BUSCO_WEIGHT = 1.0
-#--------------------------------------  
-#--------------------------------------  
+#--------------------------------------
+#--------------------------------------
 def genes_shared(BUSCO_PAIRS, CONTIG_PAIRS, LENGTHS):
 
   # Now merge the gene mapping information with the BUSCO information
@@ -29,7 +29,7 @@ def genes_shared(BUSCO_PAIRS, CONTIG_PAIRS, LENGTHS):
       total_genes_shared = BUSCO_PAIRS[pair] + CONTIG_PAIRS[pair]
     else:
       total_genes_shared = BUSCO_PAIRS[pair]
-      
+
     if total_genes_shared > THRESHOLD_SHARED_GENES:
       # Shared genes per MB normalized by the shorter contig length
       shorter_contig_length = min(LENGTHS[pair[0]], LENGTHS[pair[1]])
@@ -45,15 +45,15 @@ def genes_shared(BUSCO_PAIRS, CONTIG_PAIRS, LENGTHS):
       total_genes_shared = BUSCO_PAIRS[pair] + CONTIG_PAIRS[pair]
     else:
       total_genes_shared = CONTIG_PAIRS[pair]
-      
+
     if total_genes_shared > THRESHOLD_SHARED_GENES:
-      # Shared genes per MB normalized by the shorter contig length    
+      # Shared genes per MB normalized by the shorter contig length
       shorter_contig_length = min(LENGTHS[pair[0]], LENGTHS[pair[1]])
       gene_density = total_genes_shared/float(shorter_contig_length) * 1000000.0
 
       if gene_density > THRESHOLD_GENE_DENSITY:
         SHARED_GENES[(pair[0], pair[1])] = gene_density
-        SHARED_GENES[(pair[1], pair[0])] = gene_density    
+        SHARED_GENES[(pair[1], pair[0])] = gene_density
 
   return SHARED_GENES
 #--------------------------------------
@@ -86,19 +86,20 @@ def find_haplotigs(PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH, LENGTHS):
   ALL_HITS = defaultdict(list)
 
   size_distribution = []
-  
-  # Record all hits for each contig 
+
+  # Record all hits for each contig
   with open(OUTPUT_DIRECTORY_PATH + '/' + 'temp.paf') as infile:
     for line in infile:
       query_contig = line.split('\t')[0]
       hit_contig = line.split('\t')[5]
-      query_start = int(line.split('\t')[2]) 
-      query_end = int(line.split('\t')[3]) 
+      query_start = int(line.split('\t')[2])
+      query_end = int(line.split('\t')[3])
       hit_start = int(line.split('\t')[7])
-      hit_end = int(line.split('\t')[8])  
-      alignment_block_length = int(line.split('\t')[10])   
+      hit_end = int(line.split('\t')[8])
+      alignment_block_length = int(line.split('\t')[10])
 
-      if alignment_block_length > 10000:
+      if alignment_block_length > 5000:
+
         ALL_HITS[query_contig].append((hit_contig, query_start, query_end, hit_start, hit_end, alignment_block_length))
         size_distribution.append(alignment_block_length)
 
@@ -138,7 +139,7 @@ def write_shared_genes_to_file(OUTPUT_DIRECTORY_PATH, SHARED_GENES, BUSCO_PAIRS,
     if (contig1, contig2) in BUSCO_PAIRS:
       total_genes_shared += BUSCO_PAIRS[contig1, contig2]
     if (contig1, contig2) in CONTIG_PAIRS:
-      total_genes_shared += CONTIG_PAIRS[contig1, contig2]    
+      total_genes_shared += CONTIG_PAIRS[contig1, contig2]
 
     f.writelines(contig1 + '\t' + contig2 + '\t' + str(LENGTHS[contig1]) + '\t' + str(LENGTHS[contig2]) + '\t' + str(total_genes_shared) + '\t' + str(gene_density) + '\n')
 
@@ -159,10 +160,10 @@ def merge_intervals(intervals):
           lower = merged[-1]
           # test for intersection between lower and higher:
           # we know via sorting that lower[0] <= higher[0]
-          if higher[0] <= lower[1] + 1:            
+          if higher[0] <= lower[1] + 1:
               upper_bound = max(lower[1], higher[1])
               merged[-1] = (lower[0], upper_bound)  # replace by merged interval
-              
+
           else:
               merged.append(higher)
   return merged
@@ -180,13 +181,13 @@ def merge_intervals(intervals, GAP):
           lower = merged[-1]
           # test for intersection between lower and higher:
           # we know via sorting that lower[0] <= higher[0]
-          if higher[0] <= lower[1] + 1 + GAP:            
+          if higher[0] <= lower[1] + 1 + GAP:
               upper_bound = max(lower[1], higher[1])
               merged[-1] = (lower[0], upper_bound)  # replace by merged interval
-              
+
           else:
               merged.append(higher)
-  return merged  
+  return merged
 #--------------------------------------
 def make_fasta_files(contigs, output_name, identifiers, sequences):
   # Now make combined FASTA files for contigs
@@ -199,14 +200,14 @@ def make_fasta_files(contigs, output_name, identifiers, sequences):
 
   f.close()
 
-  return  
-#--------------------------------------  
+  return
+#--------------------------------------
 def total_length(contigs, sequence_lengths):
   # Takes a list of contigs as input, returns total length
 
   total_length = sum([sequence_lengths[contig] for contig in contigs])
 
-  return total_length  
+  return total_length
 #--------------------------------------
 def SimpleFastaParser(handle):
     for line in handle:
@@ -241,9 +242,9 @@ def read_gene_mapping(GENE_MAPPING):
                 551     0       0       0       0       0       0       0       -       evm.TU.hcontig_014_192.4        1154    0       551     tig00000338_arrow_arrow_pilon_pilon     204015  156831      157382  1       551,    603,    156831,
 
       Input:    Biokanga blitz results table.
-  
-      Return:   A dictionary that holds contigs pairs and the number of genes they share.       
-  """  
+
+      Return:   A dictionary that holds contigs pairs and the number of genes they share.
+  """
   SHARED_GENES = {}
 
   f = open(GENE_MAPPING, 'r')
@@ -253,7 +254,7 @@ def read_gene_mapping(GENE_MAPPING):
   for line in content[5:]:
     gene = line.split('\t')[9]
     contig = line.split('\t')[13]
-    match_score = int(line.split('\t')[0])   
+    match_score = int(line.split('\t')[0])
 
     if gene in SHARED_GENES:
       SHARED_GENES[gene] = list(set(SHARED_GENES[gene] + [(match_score, contig)]))
@@ -297,7 +298,7 @@ def genes_shared_per_MB(contig1, contig2, GENE_PAIR_DIC):
   if (contig1, contig2) in GENE_PAIR_DIC:
     gene_density = GENE_PAIR_DIC[(contig1, contig2)]/float(shorter_contig_length) * 1000000.0
 
-  return gene_density 
+  return gene_density
 #--------------------------------------
 def gene_bins_to_file(OUTPUT_DIRECTORY_PATH, GENE_BINS, LENGTHS):
 
@@ -310,11 +311,11 @@ def gene_bins_to_file(OUTPUT_DIRECTORY_PATH, GENE_BINS, LENGTHS):
     haplotype2 = values[1]
 
     length_of_partition = total_length(haplotype1 + haplotype2, LENGTHS)
-    
-    line = key + '\t' + str(length_of_partition/1000000.0) + '\t' 
-    line += ",".join(haplotype1) + '\t' + str(total_length(haplotype1, LENGTHS)/1000000.0) + '\t' 
-    line += ",".join(haplotype2) + '\t' + str(total_length(haplotype2, LENGTHS)/1000000.0) + '\n' 
-    f.writelines(line)  
+
+    line = key + '\t' + str(length_of_partition/1000000.0) + '\t'
+    line += ",".join(haplotype1) + '\t' + str(total_length(haplotype1, LENGTHS)/1000000.0) + '\t'
+    line += ",".join(haplotype2) + '\t' + str(total_length(haplotype2, LENGTHS)/1000000.0) + '\n'
+    f.writelines(line)
   f.close()
 
   return
@@ -330,10 +331,10 @@ def partition_to_genebins(partition, LENGTHS, SHARED_GENES):
       list_1, list_2 = [], []
 
       # Use partitions longer than 1 MB for good Hi-C signal later
-      if length_of_partition/1000000.0 > 1.0 and len(list_nodes) >= 2.0: 
+      if length_of_partition/1000000.0 > 1.0 and len(list_nodes) >= 2.0:
 
-        count += 1  
-        
+        count += 1
+
         # If a group contains only two contigs, phasing is trivial
         if len(list_nodes) == 2.0:
 
@@ -342,7 +343,7 @@ def partition_to_genebins(partition, LENGTHS, SHARED_GENES):
             list_2.append(list_nodes[1])
           else:
             list_1.append(list_nodes[1])
-            list_2.append(list_nodes[0])          
+            list_2.append(list_nodes[0])
           GENE_BINS['Bin_' + str(count)] = [list_1, list_2]
 
         # If a group contains > two contigs, phasing is done with a graph community approach
@@ -369,7 +370,7 @@ def bin_to_haplotypes(list_nodes, SHARED_GENES, count, LENGTHS, GENE_BINS):
           G.add_edge(node1, node2, weight=0.0)
 
         # If contigs do not share genes, they are unlikely haplotigs.
-        # Non-haplotigs should be connected in phasing, so give them connected weight of one       
+        # Non-haplotigs should be connected in phasing, so give them connected weight of one
         else:
           G.add_edge(node1, node2, weight=1.0)
 
@@ -393,7 +394,7 @@ def bin_to_haplotypes(list_nodes, SHARED_GENES, count, LENGTHS, GENE_BINS):
     print('This partition will not be included.')
 
   return GENE_BINS
-#--------------------------------------  
+#--------------------------------------
 def read_in_BUSCOs(BUSCO_TABLE):
   """ Function: read_in_BUSCOs()
       Purpose:  This function reads in a BUSCO results table and records contigs that share BUSCOs == likely haplotigs.
@@ -403,11 +404,11 @@ def read_in_BUSCOs(BUSCO_TABLE):
                 EOG092R000C     Duplicated      tig00063507_arrow_arrow_pilon_pilon     1422836 1435132 2923.4  2612
                 EOG092R000I     Duplicated      tig00000071_arrow_arrow_pilon_pilon     294298  305900  1987.6  1916
                 EOG092R000I     Duplicated      tig00063499_arrow_arrow_pilon_pilon     2581873 2593475 2089.2  1940
-      
+
       Input:    BUSCO results table.
-  
-      Return:   A dictionary that holds contigs pairs and the number of BUSCOs they share.       
-  """  
+
+      Return:   A dictionary that holds contigs pairs and the number of BUSCOs they share.
+  """
 
   f = open(BUSCO_TABLE, 'r')
   content = f.readlines()
@@ -447,8 +448,8 @@ def read_in_BUSCOs(BUSCO_TABLE):
         BUSCO_PAIRS[pair] = BUSCO_WEIGHT * 1
 
   return BUSCO_PAIRS
-#-------------------------------------- 
-''' 
+#--------------------------------------
+'''
 This script requires a couple of input files:
 1) a file that has the gene mapping, produced by biokanga blitz
 2) a busco results table (full_table)
@@ -458,10 +459,10 @@ This script requires a couple of input files:
 module load biokanga/4.4.2
 genome="LR1-canu-guppy4-haplotigs.contigs.fasta"
 biokanga index --threads=4 -i ${genome} -o biokanga_index/genome -r gene_mapping
-biokanga blitz --sensitivity=2 --mismatchscore=1 --threads=4 -o Pgt_Annotation_LR1.txt --in=Puccinia_graminis_tritici_21-0.transcripts.fa --sfx=biokanga_index/genome 
+biokanga blitz --sensitivity=2 --mismatchscore=1 --threads=4 -o Pgt_Annotation_LR1.txt --in=Puccinia_graminis_tritici_21-0.transcripts.fa --sfx=biokanga_index/genome
 ###############################
 '''
-#--------------------------------------  
+#--------------------------------------
 '''f = open('/home/spe12g/LeafRust_LR1/A_141tigsTo18Chr_use.gff3')
 content = f.readlines()
 A_dic = {}

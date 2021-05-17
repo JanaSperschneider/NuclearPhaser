@@ -794,7 +794,7 @@ for contig, length in PHASESWITCH_CANDIDATES:
     for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
         contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
 
-        if potential_haplotig_aligned > THRESHOLD_MIN_ALIGNMENT:
+        if potential_haplotig_aligned > 25.0:
             for (start, end) in merged_hits:
                 if end-start > 10000:
                     ALIGNMENTS.append((start, end, potential_haplotig))

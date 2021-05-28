@@ -779,7 +779,7 @@ for contig, length in LENGTHS.items():
     				output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
     				output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))])
     				output += '\t'
-    				output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(haplotype_1_contacts/total_contacts,2)) + '\t'
+    				output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(100.0*haplotype_1_contacts/total_contacts,2)) + '\t'
     				output += str(round(haplotype_0_contacts,2)) + '\t' + str(round(haplotype_1_contacts,2)) + '\n'
     				f.writelines(output)
     			else:

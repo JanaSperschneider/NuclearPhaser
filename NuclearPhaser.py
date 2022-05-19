@@ -749,7 +749,7 @@ for contig, length in LENGTHS.items():
 
     total_contacts = haplotype_0_contacts + haplotype_1_contacts
 
-    if 100.0*haplotype_1_contacts/total_contacts <= THRESHOLD_HIC_PERCENT and 100.0*haplotype_0_contacts/total_contacts <= THRESHOLD_HIC_PERCENT:
+    if 100.0*haplotype_1_contacts/total_contacts <= 95.0 and 100.0*haplotype_0_contacts/total_contacts <= 95.0:
     	PHASESWITCH_CANDIDATES.append((contig, length))
     	f = open(OUTPUT_DIRECTORY_PATH + '/' + contig + '_HiC_Contacts.txt', 'w')
 

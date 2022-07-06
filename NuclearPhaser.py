@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    NuclearPhaser: prediction of apoplastic and cytoplasmic effectors in fungi and oomycetes
+    NuclearPhaser
     Copyright (C) 2021-2022 Jana Sperschneider
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,17 +103,17 @@ def read_in_contact_map_per_contig(CONTACT_MAP):
       end2 = int(line.split('\t')[5])
       freq = float(line.split('\t')[6])
 
-      #if contig1 != contig2:
-      #---------------
-      if contig1 in CONTACTS_PER_CONTIG:
-        CONTACTS_PER_CONTIG[contig1] = CONTACTS_PER_CONTIG[contig1] + [(start1, end1, contig2, freq)]
-      else:
-        CONTACTS_PER_CONTIG[contig1] = [(start1, end1, contig2, freq)]
-      #---------------
-      if contig2 in CONTACTS_PER_CONTIG:
-        CONTACTS_PER_CONTIG[contig2] = CONTACTS_PER_CONTIG[contig2] + [(start2, end2, contig1, freq)]
-      else:
-        CONTACTS_PER_CONTIG[contig2] = [(start2, end2, contig1, freq)]
+      if contig1 != contig2:
+        #---------------
+        if contig1 in CONTACTS_PER_CONTIG:
+            CONTACTS_PER_CONTIG[contig1] = CONTACTS_PER_CONTIG[contig1] + [(start1, end1, contig2, freq)]
+        else:
+            CONTACTS_PER_CONTIG[contig1] = [(start1, end1, contig2, freq)]
+        #---------------
+        if contig2 in CONTACTS_PER_CONTIG:
+            CONTACTS_PER_CONTIG[contig2] = CONTACTS_PER_CONTIG[contig2] + [(start2, end2, contig1, freq)]
+        else:
+            CONTACTS_PER_CONTIG[contig2] = [(start2, end2, contig1, freq)]
 
 
   return CONTACTS_PER_CONTIG
@@ -139,23 +139,23 @@ def read_in_contact_map(CONTACT_MAP):
       end2 = int(line.split('\t')[5])
       freq = float(line.split('\t')[6])
 
-      #if contig1 != contig2:
-      #---------------
-      pair = (contig1, contig2)
+      if contig1 != contig2:
+        #---------------
+        pair = (contig1, contig2)
 
-      if pair in CONTACTS:
-        previous_freq = CONTACTS[pair]
-        CONTACTS[pair] = previous_freq + freq
-      else:
-        CONTACTS[pair] = freq
-      #---------------
-      pair = (contig2, contig1)
+        if pair in CONTACTS:
+            previous_freq = CONTACTS[pair]
+            CONTACTS[pair] = previous_freq + freq
+        else:
+            CONTACTS[pair] = freq
+        #---------------
+        pair = (contig2, contig1)
 
-      if pair in CONTACTS:
-        previous_freq = CONTACTS[pair]
-        CONTACTS[pair] = previous_freq + freq
-      else:
-        CONTACTS[pair] = freq
+        if pair in CONTACTS:
+            previous_freq = CONTACTS[pair]
+            CONTACTS[pair] = previous_freq + freq
+        else:
+            CONTACTS[pair] = freq
     #---------------
   return CONTACTS, BINSIZE
 #--------------------------------------

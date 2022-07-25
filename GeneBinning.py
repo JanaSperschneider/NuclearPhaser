@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+"""
+    NuclearPhaser
+    Copyright (C) 2021-2022 Jana Sperschneider
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Contact: jana.sperschneider@csiro.au
+"""
 import sys
 import os
 import networkx as nx
@@ -60,7 +76,7 @@ def genes_shared(BUSCO_PAIRS, CONTIG_PAIRS, LENGTHS):
 def find_haplotigs(PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH, LENGTHS):
   #--------------------------------------
   print("Run minimap2")
-  ParamList = ['minimap2', '-k19', '-w19', '-m200', '-DP', '-r1000', '-t4', PATH_TO_GENOME_FASTA, PATH_TO_GENOME_FASTA, '-o', OUTPUT_DIRECTORY_PATH + '/' + 'temp.paf']
+  ParamList = ['minimap2', '-k19', '-w19', '-m200', '-DP', '-r1000', PATH_TO_GENOME_FASTA, PATH_TO_GENOME_FASTA, '-o', OUTPUT_DIRECTORY_PATH + '/' + 'temp.paf']
 
   try:
       Process = subprocess.Popen(ParamList, shell=False)
@@ -146,27 +162,6 @@ def write_shared_genes_to_file(OUTPUT_DIRECTORY_PATH, SHARED_GENES, BUSCO_PAIRS,
   f.close()
 
   return
-#--------------------------------------
-def merge_intervals(intervals):
-
-  sorted_by_lower_bound = sorted(intervals, key=lambda tup: tup[0])
-
-  merged = []
-
-  for higher in sorted_by_lower_bound:
-      if not merged:
-          merged.append(higher)
-      else:
-          lower = merged[-1]
-          # test for intersection between lower and higher:
-          # we know via sorting that lower[0] <= higher[0]
-          if higher[0] <= lower[1] + 1:
-              upper_bound = max(lower[1], higher[1])
-              merged[-1] = (lower[0], upper_bound)  # replace by merged interval
-
-          else:
-              merged.append(higher)
-  return merged
 #--------------------------------------
 def merge_intervals(intervals, GAP):
 
@@ -266,6 +261,7 @@ def read_gene_mapping(GENE_MAPPING):
   for gene, contig_list in SHARED_GENES.items():
     # The top matches will not appear first in the list by default, sorted by highest match score first
     contig_list = sorted(contig_list, reverse=True)
+    #contig_list = contig_list[:2]
 
     # Collect the number of genes that two contigs share, use only genes that occur exactly twice
     if len(contig_list) == 2.0: # Genes occur exactly twice
@@ -331,7 +327,8 @@ def partition_to_genebins(partition, LENGTHS, SHARED_GENES):
       list_1, list_2 = [], []
 
       # Use partitions longer than 1 MB for good Hi-C signal later
-      if length_of_partition/1000000.0 > 1.0 and len(list_nodes) >= 2.0:
+      if length_of_partition/1000000.0 > 1.0 and len(list_nodes) >= 2.0:      
+      #if length_of_partition/1000000.0 > 0.5 and len(list_nodes) >= 2.0:
 
         count += 1
 
@@ -449,35 +446,3 @@ def read_in_BUSCOs(BUSCO_TABLE):
 
   return BUSCO_PAIRS
 #--------------------------------------
-'''
-This script requires a couple of input files:
-1) a file that has the gene mapping, produced by biokanga blitz
-2) a busco results table (full_table)
-4) a path to the assembly fasta file
-###############################
-# Example for biokanga blitz file
-module load biokanga/4.4.2
-genome="LR1-canu-guppy4-haplotigs.contigs.fasta"
-biokanga index --threads=4 -i ${genome} -o biokanga_index/genome -r gene_mapping
-biokanga blitz --sensitivity=2 --mismatchscore=1 --threads=4 -o Pgt_Annotation_LR1.txt --in=Puccinia_graminis_tritici_21-0.transcripts.fa --sfx=biokanga_index/genome
-###############################
-'''
-#--------------------------------------
-'''f = open('/home/spe12g/LeafRust_LR1/A_141tigsTo18Chr_use.gff3')
-content = f.readlines()
-A_dic = {}
-for line in content[1:]:
-  chromosome = line.split()[0]
-  contig = line.split()[8].replace('Name=','').strip()
-  A_dic[contig] = chromosome
-f.close()
-
-f = open('/home/spe12g/LeafRust_LR1/B_135tigsTo18Chr_use.gff3')
-content = f.readlines()
-B_dic = {}
-for line in content[1:]:
-  chromosome = line.split()[0]
-  contig = line.split()[8].replace('Name=','').strip()
-  B_dic[contig] = chromosome
-f.close()
-#--------------------------------------'''

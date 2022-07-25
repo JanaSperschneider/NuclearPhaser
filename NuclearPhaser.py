@@ -543,33 +543,40 @@ def print_phased_contig_stats(HAPLOTYPE_BINS):
   haplotype_0_contacts_to_haplotype0, haplotype_0_contacts_to_haplotype1 = [], []
   haplotype_1_contacts_to_haplotype0, haplotype_1_contacts_to_haplotype1 = [], []
 
-  for contig in haplotype0:
+  for contig in sorted(haplotype0):
     # Check if this contig really belongs to its haplotype
     haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
 
-    haplotype_0_contacts = sum([CONTACTS[(contig, x)] for x in haplotype0 if (contig, x) in CONTACTS])
-    haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in haplotype1 if (contig, x) in CONTACTS])
+    haplotype_0_contacts = [CONTACTS[(contig, x)] for x in haplotype0 if (contig, x) in CONTACTS]
+    haplotype_0_contacts = sum([contact_count for contact_count in haplotype_0_contacts])
 
-    haplotype_0_contacts_to_haplotype0.append(haplotype_0_contacts)
-    haplotype_0_contacts_to_haplotype1.append(haplotype_1_contacts)
+    haplotype_1_contacts = [CONTACTS[(contig, x)] for x in haplotype1 if (contig, x) in CONTACTS]
+    haplotype_1_contacts = sum([contact_count for contact_count in haplotype_1_contacts])
+
+    total_contacts = haplotype_0_contacts + haplotype_1_contacts
+
+    if total_contacts > THRESHOLD_HIC_COUNT:
+      haplotype_0_contacts_to_haplotype0.append(100.0*haplotype_0_contacts/total_contacts)
+      haplotype_0_contacts_to_haplotype1.append(100.0*haplotype_1_contacts/total_contacts)
 
   for contig in sorted(haplotype1):
     # Check if this contig really belongs to its haplotype
     haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
 
-    haplotype_0_contacts = sum([CONTACTS[(contig, x)] for x in haplotype0 if (contig, x) in CONTACTS])
-    haplotype_1_contacts = sum([CONTACTS[(contig, x)] for x in haplotype1 if (contig, x) in CONTACTS])
+    haplotype_0_contacts = [CONTACTS[(contig, x)] for x in haplotype0 if (contig, x) in CONTACTS]
+    haplotype_0_contacts = sum([contact_count for contact_count in haplotype_0_contacts])
 
-    haplotype_1_contacts_to_haplotype0.append(haplotype_0_contacts)
-    haplotype_1_contacts_to_haplotype1.append(haplotype_1_contacts)
+    haplotype_1_contacts = [CONTACTS[(contig, x)] for x in haplotype1 if (contig, x) in CONTACTS]
+    haplotype_1_contacts = sum([contact_count for contact_count in haplotype_1_contacts])
 
-  haplotype_0_contacts_to_haplotype0, haplotype_0_contacts_to_haplotype1 = sum(haplotype_0_contacts_to_haplotype0), sum(haplotype_0_contacts_to_haplotype1)
-  haplotype_1_contacts_to_haplotype0, haplotype_1_contacts_to_haplotype1 = sum(haplotype_1_contacts_to_haplotype0), sum(haplotype_1_contacts_to_haplotype1)
+    total_contacts = haplotype_0_contacts + haplotype_1_contacts
 
-  mean_haplotype_0_contacts_to_haplotype0 = round(100.0*haplotype_0_contacts_to_haplotype0/(haplotype_0_contacts_to_haplotype0 + haplotype_0_contacts_to_haplotype1), 2)
-  mean_haplotype_0_contacts_to_haplotype1 = round(100.0*haplotype_0_contacts_to_haplotype1/(haplotype_0_contacts_to_haplotype0 + haplotype_0_contacts_to_haplotype1), 2)
-  mean_haplotype_1_contacts_to_haplotype0 = round(100.0*haplotype_1_contacts_to_haplotype0/(haplotype_1_contacts_to_haplotype0 + haplotype_1_contacts_to_haplotype1), 2)
-  mean_haplotype_1_contacts_to_haplotype1 = round(100.0*haplotype_1_contacts_to_haplotype1/(haplotype_1_contacts_to_haplotype0 + haplotype_1_contacts_to_haplotype1), 2)
+    if total_contacts > THRESHOLD_HIC_COUNT:
+      haplotype_1_contacts_to_haplotype0.append(100.0*haplotype_0_contacts/total_contacts)
+      haplotype_1_contacts_to_haplotype1.append(100.0*haplotype_1_contacts/total_contacts)
+
+  mean_haplotype_0_contacts_to_haplotype0 = round(sum(haplotype_0_contacts_to_haplotype0)/len(haplotype_0_contacts_to_haplotype0), 2)
+  mean_haplotype_1_contacts_to_haplotype1 = round(sum(haplotype_1_contacts_to_haplotype1)/len(haplotype_1_contacts_to_haplotype1), 2)
 
   print()
   print('Total number of contigs:', len(LENGTHS))

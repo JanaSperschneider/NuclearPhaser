@@ -17,7 +17,7 @@ NuclearPhaser is a method for phasing of dikaryotic genomes into the two haploty
 
 ### Prerequisites for running NuclearPhaser
 
-* A clean genome assembly that has few collapsed regions and is cleaned from contaminant contigs
+* A high-quality genome assembly that has few collapsed regions and is cleaned from contaminant contigs
 
 The following software needs to be installed:
 * Python3 
@@ -106,7 +106,7 @@ You can see here that duplicated BUSCOs will also act like a phasing marker as t
 
 Third, you need a Hi-C contact map in ginteractions format. We recommend following the HiC-Pro pipeline (https://github.com/nservant/HiC-Pro) and then converting the h5 format to ginteractions with hicexplorer (https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html).
 
-We also recommend to set MAPQ=30 in the HiC-Pro config file and to obtain a matrix at resolution 20,000 bps.
+We also recommend to set MAPQ=10 in the HiC-Pro config file and to obtain a matrix at resolution 100,000 bps. You can also try MAPQ=30 and resolution 20,000 bps.
 
 Your Hi-C contact map output file in ginteractions format should look like this:
 
@@ -125,8 +125,8 @@ tig00000001     0       20000   tig00000286     0       20000   0.415017
 
 Now you are ready to run the phasing pipeline like so:
 ```
-python NuclearPhaser.py Pt_Clean_Genome_GeneMapping.txt full_table_buscov3_clean_assembly.tsv \
-HiC_MAPQ30.clean_assembly.20000.matrix.tsv ${genome} /path_to_output_dir/Genome_Phasing_Output/
+python NuclearPhaser.py -g Pt_Clean_Genome_GeneMapping.txt -b full_table_buscov3_clean_assembly.tsv \
+-c HiC_MAPQ30.clean_assembly.20000.matrix.tsv -f ${genome} -o /path_to_output_dir/Genome_Phasing_Output/
 ```
 
 You should get an output like this:
@@ -272,9 +272,9 @@ At this stage you have to re-generate the three input files (with biokanga blitz
 Then run NuclearPhaser again:
 
 ```
-python NuclearPhaser.py Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt \
-full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv \
-${genome_PhaseSwitchesCorrected} /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
+python NuclearPhaser.py -g Pt_Clean_Genome_PhaseSwitchesCorrected_GeneMapping.txt \
+-b full_table_buscov3_clean_assembly_PhaseSwitchesCorrected.tsv -c HiC_MAPQ30.clean_assembly_PhaseSwitchesCorrected.20000.matrix.tsv \
+-f ${genome_PhaseSwitchesCorrected} -o /path_to_output_dir/Genome_Phasing_Output_PhaseSwitchesCorrected/
 ```
 
 This should now run to completion with two phased haplotypes and the remaining unplaced contigs as the final output.

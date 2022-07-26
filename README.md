@@ -184,7 +184,7 @@ In this example, NuclearPhaser found 26 gene/scaffold bins that contain 193 cont
 
 #### Step2: Correct phase switches in the gene bins
 
-It is very likely that you will see phase switches, even in HiFi assemblies. We found that if a contig has >80% of its Hi-C contacts to one of the haplotypes, it is phased correctly. If it has e.g. 60% of its Hi-C contacts to haplotype 0 and 40% of its Hi-C contacts to haplotype 1, it likely contains phase switches. NuclearPhaser now goes through the gene bins and prints the Hi-C contact frequencies for each like so:
+It is very likely that you will see phase switches, even in HiFi assemblies. NuclearPhaser now goes through the gene bins and prints the Hi-C trans contact frequencies to haplotype 0 and 1 for each gene bin like so:
 
 ```
 ------- Hi-C contacts in this bin Bin_1 -------

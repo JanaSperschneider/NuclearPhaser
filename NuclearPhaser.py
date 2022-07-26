@@ -1069,7 +1069,7 @@ for contig, length in LENGTHS.items():
           output += '\t'
           output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(100.0*haplotype_1_contacts/total_contacts,2)) + '\t'
           output += str(haplotype_0_contacts) + '\t' + str(haplotype_1_contacts) + '\t'
-          output += str(round(100.0*haplotig_contacts/total_contacts,2)) + '\t' + str(haplotig_contacts) + '\t' + '\n'
+          output += str(round(100.0*haplotig_contacts/total_contacts,2)) + '\t' + str(haplotig_contacts) + '\n'
           f.writelines(output)
       f.close()
 

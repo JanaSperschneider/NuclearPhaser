@@ -1085,6 +1085,30 @@ for contig, length in LENGTHS.items():
             if round(100.0*haplotig_contacts_contig/total_contacts_with_allelic, 2) > 0.0:
               PHASESWITCH_CANDIDATES.append((contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic))
 
+    f_alignments = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_Haplotigs.txt', 'w')
+    # Now print out the alignment coordinates for the haplotigs, too
+    ALIGNMENTS = []
+    for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
+        contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
+
+        if potential_haplotig_aligned > 25.0:
+          for (start, end) in merged_hits:
+            if end-start > 20000:
+              ALIGNMENTS.append((start, end, potential_haplotig))
+
+    for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
+      haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
+      haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+      haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+      sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
+      output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
+      if sum_of_contacts > 0.0:
+        output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
+      else:
+        output += '\t' + '0.0' + '\t' + '0.0' + '\n'
+      f_alignments.writelines(output)
+    f_alignments.close()
+
 if PHASESWITCH_CANDIDATES == []:
   print('----------------------------------------')
   print('Found no phase switch regions on contigs > 0.5 Mb.')
@@ -1106,29 +1130,7 @@ for contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, me
   print('Allelic contacts:', str(round(100.0*haplotig_contacts_contig/(total_contacts_with_allelic), 2)), '%') 
   print('----------------------------------------')
 
-  f_alignments = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_Haplotigs.txt', 'w')
-  # Now print out the alignment coordinates for the haplotigs, too
-  ALIGNMENTS = []
-  for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
-      contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
 
-      if potential_haplotig_aligned > 25.0:
-        for (start, end) in merged_hits:
-          if end-start > 20000:
-            ALIGNMENTS.append((start, end, potential_haplotig))
-
-  for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
-    haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
-    haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-    haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-    sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
-    output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
-    if sum_of_contacts > 0.0:
-      output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
-    else:
-      output += '\t' + '0.0' + '\t' + '0.0' + '\n'
-    f_alignments.writelines(output)
-  f_alignments.close()
 #--------------------------------------
 #--------------------------------------
 # Now place the remaining contigs based on synteny

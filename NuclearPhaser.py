@@ -38,6 +38,8 @@ THRESHOLD_HIC_COUNT = 20.0
 THRESHOLD_MIN_ALIGNMENT = 50.0
 MIN_LENGTH_TO_PHASE_WITH_HIC = 20000.0 # contig length in base pairs
 HIC_CONTACT_THRESHOLD = 0.0
+PHASE_SWITCH_CONTIG_MIN_SIZE = 1000000
+PHASE_SWITCH_REGION_MIN_SIZE = 400000
 # -----------------------------------------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------------------------------------
@@ -1010,7 +1012,7 @@ header = '#Start\tEnd\tContacts (|: haplotype 0 and *: haplotype 1)\t% Hi-C cont
 header += '%Hi-C frequency to haplotigs\tHi-C frequency to haplotigs\n'
 
 for contig, length in LENGTHS.items():
-  if length > 500000:
+  if length > PHASE_SWITCH_CONTIG_MIN_SIZE:
 
     # Now get the haplotigs of this contig
     for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
@@ -1055,9 +1057,9 @@ for contig, length in LENGTHS.items():
 
         haplotig_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in haplotigs])
 
-        if haplotype_0_contacts > haplotype_1_contacts:
+        if haplotype_0_contacts > haplotype_1_contacts and 100.0*haplotype_0_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
           hap0_coordinates.append((start, end))
-        if haplotype_0_contacts < haplotype_1_contacts:
+        if haplotype_0_contacts < haplotype_1_contacts and 100.0*haplotype_1_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
           hap1_coordinates.append((start, end))
 
         total_contacts = haplotype_0_contacts+haplotype_1_contacts
@@ -1073,17 +1075,17 @@ for contig, length in LENGTHS.items():
           f.writelines(output)
       f.close()
 
-      merged_intervals_hap0 = GeneBinning.merge_intervals(hap0_coordinates, BINSIZE)
-      merged_intervals_hap1 = GeneBinning.merge_intervals(hap1_coordinates, BINSIZE)
+      merged_intervals_hap0 = GeneBinning.merge_intervals(hap0_coordinates, 0)
+      merged_intervals_hap1 = GeneBinning.merge_intervals(hap1_coordinates, 0)
 
-      merged_intervals_hap0_threshold = [(x,y) for (x,y) in merged_intervals_hap0 if y-x >= BINSIZE*5.0]
-      merged_intervals_hap1_threshold = [(x,y) for (x,y) in merged_intervals_hap1 if y-x >= BINSIZE*5.0]
+      merged_intervals_hap0_threshold = [(x,y) for (x,y) in merged_intervals_hap0 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
+      merged_intervals_hap1_threshold = [(x,y) for (x,y) in merged_intervals_hap1 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
 
       if merged_intervals_hap0_threshold != [] and merged_intervals_hap1_threshold != []:
-        if round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 90.0:
-          if round(100.0*haplotype_1_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 90.0:
-            if round(100.0*haplotig_contacts_contig/total_contacts_with_allelic, 2) > 0.0:
-              PHASESWITCH_CANDIDATES.append((contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic))
+        #if round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 95.0:
+          #if round(100.0*haplotype_1_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 95.0:
+        if round(100.0*haplotig_contacts_contig/total_contacts_with_allelic, 2) > 0.0:
+          PHASESWITCH_CANDIDATES.append((contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic))
 
     f_alignments = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_Haplotigs.txt', 'w')
     # Now print out the alignment coordinates for the haplotigs, too
@@ -1111,16 +1113,16 @@ for contig, length in LENGTHS.items():
 
 if PHASESWITCH_CANDIDATES == []:
   print('----------------------------------------')
-  print('Found no phase switch regions on contigs > 0.5 Mb.')
+  print('Found no phase switch regions on contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
   print('----------------------------------------')
 else:
   print('----------------------------------------')
-  print('Found potential phase switch regions on', len(PHASESWITCH_CANDIDATES), 'contigs > 0.5 Mb.')
+  print('Found potential phase switch regions on', len(PHASESWITCH_CANDIDATES), 'contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
   print('----------------------------------------')  
 
 for contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic in PHASESWITCH_CANDIDATES:
   print('----------------------------------------')
-  print('Potential phase switch in this contig > 0.5 Mb:', contig, '(', length, ' bps)')
+  print('Potential phase switch in this contig >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb:', contig, '(', length, ' bps)')
   print('Hi-C trans contact to haplotype 0 (without allelic contacts):', str(round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig), 2)), '%')
   print('Haplotype 0 regions on this contig:')
   print(merged_intervals_hap0_threshold)
@@ -1129,7 +1131,6 @@ for contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, me
   print(merged_intervals_hap1_threshold)
   print('Allelic contacts:', str(round(100.0*haplotig_contacts_contig/(total_contacts_with_allelic), 2)), '%') 
   print('----------------------------------------')
-
 
 #--------------------------------------
 #--------------------------------------

@@ -39,7 +39,6 @@ THRESHOLD_MIN_ALIGNMENT = 50.0
 MIN_LENGTH_TO_PHASE_WITH_HIC = 20000.0 # contig length in base pairs
 HIC_CONTACT_THRESHOLD = 0.0
 PHASE_SWITCH_CONTIG_MIN_SIZE = 1000000
-PHASE_SWITCH_REGION_MIN_SIZE = 400000
 # -----------------------------------------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------------------------------------
@@ -611,7 +610,7 @@ def usage():
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ''')
     print("Usage for NuclearPhaser 1.1: ")
-    print("python NuclearPhaser.py -g <gene mapping file> -b <BUSCO output table> -c <Hi-C contact map> -f <genome FASTA file> -o <output folder>")
+    print("python NuclearPhaser.py [-options] -g <gene mapping file> -b <BUSCO output table> -c <Hi-C contact map> -f <genome FASTA file> -o <output folder>")
     print()
     print("where required options are:")
     print("-g : biokanga blitz gene mapping file")    
@@ -620,7 +619,7 @@ def usage():
     print("-f : Genome FASTA file")    
     print("-o : Output folder name")            
     print()
-    print("other options:")
+    print("where other options are:")   
     print("-h : show brief help on version and usage")
     print()
     print("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
@@ -760,6 +759,8 @@ CONTACTS_CIS_TRANS, CONTACTS, BINSIZE  = read_in_contact_map(CONTACT_MAP)
 CONTACTS_CIS_TRANS_PER_CONTIG, CONTACTS_PER_CONTIG = read_in_contact_map_per_contig(CONTACT_MAP)
 print('Hi-C contact matrix has resolution:', BINSIZE)
 print('Done')
+#--------------------------------------
+PHASE_SWITCH_REGION_MIN_SIZE = BINSIZE*4.0
 #--------------------------------------
 #--------------------------------------
 # First step is to generate bins of contig pairs that share genes == parts of ~chromosomes a/b in each bin

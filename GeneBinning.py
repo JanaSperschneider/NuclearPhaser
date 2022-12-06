@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-    NuclearPhaser
-    Copyright (C) 2021-2022 Jana Sperschneider
+    NuclearPhaser 1.1
+    Copyright (C) 2022-2023 Jana Sperschneider
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
@@ -27,7 +27,7 @@ import operator
 from collections import defaultdict
 #--------------------------------------
 #--------------------------------------
-THRESHOLD_GENE_DENSITY = 30.0
+THRESHOLD_GENE_DENSITY = 10.0 #previously 30.0
 THRESHOLD_SHARED_GENES = 2.0
 BUSCO_WEIGHT = 1.0
 #--------------------------------------
@@ -371,7 +371,7 @@ def bin_to_haplotypes(list_nodes, SHARED_GENES, count, LENGTHS, GENE_BINS):
         else:
           G.add_edge(node1, node2, weight=1.0)
 
-  partition_contigs = community.best_partition(G)
+  partition_contigs = community.best_partition(G, randomize=False)
 
   if len(set(partition_contigs.values())) == 2.0:
     list_1, list_2 = [], []

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    NuclearPhaser
+    NuclearPhaser 1.1
     Copyright (C) 2022-2023 Jana Sperschneider
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ from collections import defaultdict
 import GeneBinning
 import math
 import getopt
+
+import matplotlib.pyplot as plt
 # -----------------------------------------------------------------------------------------------------------
 # Global variables
 # -----------------------------------------------------------------------------------------------------------
@@ -620,6 +622,7 @@ def usage():
     print("-o : Output folder name")            
     print()
     print("where other options are:")   
+    print("-p : p*BINSIZE is the minimum size of a phase switch region. For example, if your Hi-C contact map has binsize 100 Kb, NuclearPhaser will warn about phase switch regions >= p*100 KB (default: p=4).")    
     print("-h : show brief help on version and usage")
     print()
     print("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
@@ -637,7 +640,7 @@ def scan_arguments(commandline):
         Return:   Parsed options.
     """
     try:
-        opts, args = getopt.getopt(commandline, "hg:b:c:f:o:", ["help"])        
+        opts, args = getopt.getopt(commandline, "hg:b:c:f:o:p:", ["help"])        
     except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err)) # will print something like "option -a not recognized"
@@ -649,6 +652,7 @@ def scan_arguments(commandline):
     CONTACT_MAP = None
     PATH_TO_GENOME_FASTA = None
     OUTPUT_DIRECTORY_PATH = None
+    PHASE_SWITCH_REGION_MIN_SIZE = None
 
     g_count, b_count, c_count, f_count, o_count = 0, 0, 0, 0, 0
    
@@ -673,6 +677,12 @@ def scan_arguments(commandline):
             OUTPUT_DIRECTORY_PATH = arg
             o_count += 1
 
+        elif opt in ("-p"):
+          PHASE_SWITCH_REGION_MIN_SIZE = arg
+          if float(PHASE_SWITCH_REGION_MIN_SIZE) < 1.0:
+            print("Please provide a number >= 1 for the -p parameter")
+            usage()
+
         elif opt in ("-h", "--help"):
             usage()
         else:
@@ -686,8 +696,134 @@ def scan_arguments(commandline):
     if g_count != 1 or b_count != 1 or c_count != 1 or f_count != 1 or o_count != 1:
        usage()
 
-    return GENE_MAPPING, BUSCO_TABLE, CONTACT_MAP, PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH 
+    return GENE_MAPPING, BUSCO_TABLE, CONTACT_MAP, PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH, PHASE_SWITCH_REGION_MIN_SIZE
 # -----------------------------------------------------------------------------------------------------------
+def investigate_phaseswitch_on_contig(contig, length, header, PHASESWITCH_CANDIDATES, identifier):
+
+  # Now get the haplotigs of this contig
+  for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
+    if contig in contigs_a:
+      haplotigs = contigs_b
+    if contig in contigs_b:
+      haplotigs = contigs_a
+
+  haplotype_0_contacts_contig = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
+  haplotype_1_contacts_contig = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
+
+  haplotype_0_contacts_contig_with_allelic = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS])
+  haplotype_1_contacts_contig_with_allelic = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS])
+
+  haplotig_contacts_contig = sum([CONTACTS[(contig, x)] for x in LENGTHS if (contig, x) in CONTACTS and (contig, x) in BLACKLISTED_HIC_LINKS])
+
+  total_contacts = haplotype_0_contacts_contig + haplotype_1_contacts_contig   
+  total_contacts_with_allelic = haplotype_0_contacts_contig_with_allelic + haplotype_1_contacts_contig_with_allelic
+
+  if contig in CONTACTS_PER_CONTIG:
+    # Print out the trans contact information
+    f = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_HiC_Contacts_TransOnly.txt', 'w')     
+    f.writelines(header)
+
+    contact_list = CONTACTS_PER_CONTIG[contig]
+
+    # First collect all trans contacts in each bin
+    CONTACTS_PER_BIN = {}
+    for (start, end, contig2, freq) in contact_list:
+      bin_coordinates = (start, end)
+      if bin_coordinates in CONTACTS_PER_BIN:
+        CONTACTS_PER_BIN[bin_coordinates] = CONTACTS_PER_BIN[bin_coordinates] + [(contig2, freq)]
+      else:
+        CONTACTS_PER_BIN[bin_coordinates] = [(contig2, freq)]
+
+    hap0_coordinates, hap1_coordinates = [], []
+
+    x_axis = []
+    y_axis_hap0, y_axis_hap1 = [], []
+
+    # Then print out the % of contacts to each haplotype for each bin
+    for (start, end), contact_list in sorted(CONTACTS_PER_BIN.items()):
+      haplotype_0_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in HAPLOTYPE_BINS['Haplotype_0']])
+      haplotype_1_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in HAPLOTYPE_BINS['Haplotype_1']])
+
+      haplotig_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in haplotigs])
+
+      if haplotype_0_contacts > haplotype_1_contacts and 100.0*haplotype_0_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
+        hap0_coordinates.append((start, end))
+      if haplotype_0_contacts < haplotype_1_contacts and 100.0*haplotype_1_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
+        hap1_coordinates.append((start, end))
+
+      total_contacts = haplotype_0_contacts+haplotype_1_contacts
+
+      if total_contacts > 0.0:
+        output = str(start) + '\t' + str(end) + '\t'
+        output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
+        output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))])
+        output += '\t'
+        output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(100.0*haplotype_1_contacts/total_contacts,2)) + '\t'
+        output += str(haplotype_0_contacts) + '\t' + str(haplotype_1_contacts) + '\t'
+        output += str(round(100.0*haplotig_contacts/total_contacts,2)) + '\t' + str(haplotig_contacts) + '\n'
+        f.writelines(output)
+
+        x_axis.append(start)
+        y_axis_hap0.append(round(100.0*haplotype_0_contacts/total_contacts,2))
+        y_axis_hap1.append(round(100.0*haplotype_1_contacts/total_contacts,2))
+    f.close()
+
+    x_axis_complete = [*range(0,length,500000)]
+
+    try:
+      plt.bar(x_axis, y_axis_hap0, width=BINSIZE*0.8)
+      plt.bar(x_axis, y_axis_hap1, width=BINSIZE*0.8, bottom=y_axis_hap0)
+
+      plt.xticks(x_axis_complete, rotation='vertical')
+
+      plt.xlabel('Position on contig (Mb)')
+      plt.ylabel('% of Hi-C trans contacts to haplotype')
+      plt.title(identifier + ': ' + contig)
+
+      #plt.show()
+      plt.savefig(OUTPUT_DIRECTORY_PATH + '/Plots/' + identifier + '_' + contig + '.png')
+      plt.clf()
+      plt.cla()
+    except:
+      pass
+
+    merged_intervals_hap0 = GeneBinning.merge_intervals(hap0_coordinates, 0)
+    merged_intervals_hap1 = GeneBinning.merge_intervals(hap1_coordinates, 0)
+
+    merged_intervals_hap0_threshold = [(x,y) for (x,y) in merged_intervals_hap0 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
+    merged_intervals_hap1_threshold = [(x,y) for (x,y) in merged_intervals_hap1 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
+
+    if merged_intervals_hap0_threshold != [] and merged_intervals_hap1_threshold != []:
+      if round(100.0*haplotig_contacts_contig/total_contacts_with_allelic, 2) > 0.0:
+        PHASESWITCH_CANDIDATES.append((contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic))
+
+  f_alignments = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_Haplotigs.txt', 'w')
+  # Now print out the alignment coordinates for the haplotigs, too
+  ALIGNMENTS = []
+  for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
+      contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
+
+      if potential_haplotig_aligned > 25.0:
+        for (start, end) in merged_hits:
+          if end-start > 20000:
+            ALIGNMENTS.append((start, end, potential_haplotig))
+
+  for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
+    haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
+    haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+    haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
+    sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
+    output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
+    if sum_of_contacts > 0.0:
+      output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
+    else:
+      output += '\t' + '0.0' + '\t' + '0.0' + '\n'
+    f_alignments.writelines(output)
+  f_alignments.close()
+
+  return PHASESWITCH_CANDIDATES
+# -----------------------------------------------------------------------------------------------------------
+
 #--------------------------------------
 #--------------------------------------
 #--------------------------------------
@@ -708,12 +844,12 @@ biokanga blitz --sensitivity=2 --mismatchscore=1 --threads=4 -o Pgt_Annotation_L
 commandline = sys.argv[1:]
 # -----------------------------------------------------------------------------------------------------------
 if commandline:
-    GENE_MAPPING, BUSCO_TABLE, CONTACT_MAP, PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH = scan_arguments(commandline)
+    GENE_MAPPING, BUSCO_TABLE, CONTACT_MAP, PATH_TO_GENOME_FASTA, OUTPUT_DIRECTORY_PATH, PHASE_SWITCH_REGION_MIN_SIZE = scan_arguments(commandline)
 else:
     usage()
 #--------------------------------------
 #--------------------------------------
-
+#--------------------------------------
 #--------------------------------------
 #--------------------------------------
 # Try to create folder where results will be stored
@@ -760,8 +896,10 @@ CONTACTS_CIS_TRANS_PER_CONTIG, CONTACTS_PER_CONTIG = read_in_contact_map_per_con
 print('Hi-C contact matrix has resolution:', BINSIZE)
 print('Done')
 #--------------------------------------
-PHASE_SWITCH_REGION_MIN_SIZE = BINSIZE*4.0
-#--------------------------------------
+if PHASE_SWITCH_REGION_MIN_SIZE == None:
+  PHASE_SWITCH_REGION_MIN_SIZE = BINSIZE*4.0
+else:
+  PHASE_SWITCH_REGION_MIN_SIZE = BINSIZE*float(PHASE_SWITCH_REGION_MIN_SIZE)
 #--------------------------------------
 # First step is to generate bins of contig pairs that share genes == parts of ~chromosomes a/b in each bin
 #--------------------------------------
@@ -776,9 +914,13 @@ for pair, gene_density in SHARED_GENES.items():
     G.add_edge(pair[0], pair[1], weight=gene_density)
 
 print('Construct community')
-partition = community.best_partition(G)
+partition = community.best_partition(G, randomize=False)
 #--------------------------------------
 GENE_BINS = GeneBinning.partition_to_genebins(partition, LENGTHS, SHARED_GENES)
+if len(GENE_BINS) == 0.0:
+  print('The gene binning did not work. Check that the BUSCO and biokanga blitz input files are valid and contain contigs that have genes that occur exactly twice.')
+  sys.exit()
+
 print('Use', len(GENE_BINS), 'gene bins.')
 print()
 #--------------------------------------
@@ -906,7 +1048,7 @@ f.close()
 #--------------------------------------
 import community
 print('Construct community to phase gene bins into the haplotypes')
-partition = community.best_partition(G)
+partition = community.best_partition(G, randomize=False)
 #--------------------------------------
 print('----------')
 #--------------------------------------
@@ -1012,126 +1154,37 @@ PHASESWITCH_CANDIDATES = []
 header = '#Start\tEnd\tContacts (|: haplotype 0 and *: haplotype 1)\t% Hi-C contacts to haplotype 0\t% Hi-C contacts to haplotype 1\tHi-C frequency to haplotype 0\tHi-C frequency to haplotype 1\t'
 header += '%Hi-C frequency to haplotigs\tHi-C frequency to haplotigs\n'
 
-for contig, length in LENGTHS.items():
-  if length > PHASE_SWITCH_CONTIG_MIN_SIZE:
+for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
 
-    # Now get the haplotigs of this contig
-    for gene_bin, (contigs_a, contigs_b) in sorted(GENE_BINS.items()):
-      if contig in contigs_a:
-        haplotigs = contigs_b
-      if contig in contigs_b:
-        haplotigs = contigs_a
-
-    haplotype_0_contacts_contig = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
-    haplotype_1_contacts_contig = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS and (contig, x) not in BLACKLISTED_HIC_LINKS])
-
-    haplotype_0_contacts_contig_with_allelic = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (contig, x) in CONTACTS])
-    haplotype_1_contacts_contig_with_allelic = sum([CONTACTS[(contig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (contig, x) in CONTACTS])
-
-    haplotig_contacts_contig = sum([CONTACTS[(contig, x)] for x in LENGTHS if (contig, x) in CONTACTS and (contig, x) in BLACKLISTED_HIC_LINKS])
-
-    total_contacts = haplotype_0_contacts_contig + haplotype_1_contacts_contig   
-    total_contacts_with_allelic = haplotype_0_contacts_contig_with_allelic + haplotype_1_contacts_contig_with_allelic
-
-    if contig in CONTACTS_PER_CONTIG:
-      # Print out the trans contact information
-      f = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_HiC_Contacts_TransOnly.txt', 'w')     
-      f.writelines(header)
-
-      contact_list = CONTACTS_PER_CONTIG[contig]
-
-      # First collect all trans contacts in each bin
-      CONTACTS_PER_BIN = {}
-      for (start, end, contig2, freq) in contact_list:
-        bin_coordinates = (start, end)
-        if bin_coordinates in CONTACTS_PER_BIN:
-          CONTACTS_PER_BIN[bin_coordinates] = CONTACTS_PER_BIN[bin_coordinates] + [(contig2, freq)]
-        else:
-          CONTACTS_PER_BIN[bin_coordinates] = [(contig2, freq)]
-
-      hap0_coordinates, hap1_coordinates = [], []
-
-      # Then print out the % of contacts to each haplotype for each bin
-      for (start, end), contact_list in sorted(CONTACTS_PER_BIN.items()):
-        haplotype_0_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in HAPLOTYPE_BINS['Haplotype_0']])
-        haplotype_1_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in HAPLOTYPE_BINS['Haplotype_1']])
-
-        haplotig_contacts = sum([freq for (contig2, freq) in contact_list if contig2 in haplotigs])
-
-        if haplotype_0_contacts > haplotype_1_contacts and 100.0*haplotype_0_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
-          hap0_coordinates.append((start, end))
-        if haplotype_0_contacts < haplotype_1_contacts and 100.0*haplotype_1_contacts/(haplotype_0_contacts+haplotype_1_contacts) > 80.0: # A phaseswitch region should have > 80% of Hi-C links going to the other haplotype
-          hap1_coordinates.append((start, end))
-
-        total_contacts = haplotype_0_contacts+haplotype_1_contacts
-
-        if total_contacts > 0.0:
-          output = str(start) + '\t' + str(end) + '\t'
-          output += "".join(['|' for i in range(0,round(100.0*haplotype_0_contacts/total_contacts))])
-          output += "".join(['*' for i in range(0,round(100.0*haplotype_1_contacts/total_contacts))])
-          output += '\t'
-          output += str(round(100.0*haplotype_0_contacts/total_contacts,2)) + '\t' + str(round(100.0*haplotype_1_contacts/total_contacts,2)) + '\t'
-          output += str(haplotype_0_contacts) + '\t' + str(haplotype_1_contacts) + '\t'
-          output += str(round(100.0*haplotig_contacts/total_contacts,2)) + '\t' + str(haplotig_contacts) + '\n'
-          f.writelines(output)
-      f.close()
-
-      merged_intervals_hap0 = GeneBinning.merge_intervals(hap0_coordinates, 0)
-      merged_intervals_hap1 = GeneBinning.merge_intervals(hap1_coordinates, 0)
-
-      merged_intervals_hap0_threshold = [(x,y) for (x,y) in merged_intervals_hap0 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
-      merged_intervals_hap1_threshold = [(x,y) for (x,y) in merged_intervals_hap1 if y-x >= PHASE_SWITCH_REGION_MIN_SIZE]
-
-      if merged_intervals_hap0_threshold != [] and merged_intervals_hap1_threshold != []:
-        #if round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 95.0:
-          #if round(100.0*haplotype_1_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig),2) < 95.0:
-        if round(100.0*haplotig_contacts_contig/total_contacts_with_allelic, 2) > 0.0:
-          PHASESWITCH_CANDIDATES.append((contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic))
-
-    f_alignments = open(OUTPUT_DIRECTORY_PATH + '/Plots/' + contig + '_Haplotigs.txt', 'w')
-    # Now print out the alignment coordinates for the haplotigs, too
-    ALIGNMENTS = []
-    for (bases_aligned, potential_haplotig, merged_hits) in HAPLOTIGS[contig]:
-        contig_aligned, potential_haplotig_aligned = check_contigs_are_haplotigs(HAPLOTIGS, (contig, potential_haplotig))
-
-        if potential_haplotig_aligned > 25.0:
-          for (start, end) in merged_hits:
-            if end-start > 20000:
-              ALIGNMENTS.append((start, end, potential_haplotig))
-
-    for (start, end, potential_haplotig) in sorted(ALIGNMENTS):
-      haplotype_0_contacts, haplotype_1_contacts = 0.0, 0.0
-      haplotype_0_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_0'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-      haplotype_1_contacts = sum([CONTACTS[(potential_haplotig, x)] for x in HAPLOTYPE_BINS['Haplotype_1'] if (potential_haplotig, x) in CONTACTS and (potential_haplotig, x) not in BLACKLISTED_HIC_LINKS])
-      sum_of_contacts = haplotype_0_contacts + haplotype_1_contacts
-      output = potential_haplotig + '\t' + str(start) + '\t' + str(end)
-      if sum_of_contacts > 0.0:
-        output += '\t' + str(round(100.0*haplotype_0_contacts/sum_of_contacts, 2)) + '\t' + str(round(100.0*haplotype_1_contacts/sum_of_contacts, 2)) + '\n'
-      else:
-        output += '\t' + '0.0' + '\t' + '0.0' + '\n'
-      f_alignments.writelines(output)
-    f_alignments.close()
+  for contig in contigs_a:
+    length = LENGTHS[contig]
+    identifier = gene_bin + '_haplotype_0'
+    PHASESWITCH_CANDIDATES = investigate_phaseswitch_on_contig(contig, length, header, PHASESWITCH_CANDIDATES, identifier)
+  for contig in contigs_b:
+    length = LENGTHS[contig]    
+    identifier = gene_bin + '_haplotype_1'    
+    PHASESWITCH_CANDIDATES = investigate_phaseswitch_on_contig(contig, length, header, PHASESWITCH_CANDIDATES, identifier)
 
 if PHASESWITCH_CANDIDATES == []:
   print('----------------------------------------')
-  print('Found no phase switch regions on contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
+  print('Found no phase switch regions >=', str(PHASE_SWITCH_REGION_MIN_SIZE), 'bps on contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
   print('----------------------------------------')
 else:
   print('----------------------------------------')
-  print('Found potential phase switch regions on', len(PHASESWITCH_CANDIDATES), 'contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
+  print('Found potential phase switch regions >=', str(PHASE_SWITCH_REGION_MIN_SIZE), 'bps on', len(PHASESWITCH_CANDIDATES), 'contigs >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb.')
   print('----------------------------------------')  
 
-for contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic in PHASESWITCH_CANDIDATES:
-  print('----------------------------------------')
-  print('Potential phase switch in this contig >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb:', contig, '(', length, ' bps)')
-  print('Hi-C trans contact to haplotype 0 (without allelic contacts):', str(round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig), 2)), '%')
-  print('Haplotype 0 regions on this contig:')
-  print(merged_intervals_hap0_threshold)
-  print('Hi-C trans contact to haplotype 1 (without allelic contacts):', str(round(100.0*haplotype_1_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig), 2)), '%')  
-  print('Haplotype 1 regions on this contig:')      
-  print(merged_intervals_hap1_threshold)
-  print('Allelic contacts:', str(round(100.0*haplotig_contacts_contig/(total_contacts_with_allelic), 2)), '%') 
-  print('----------------------------------------')
+  for contig, length, haplotype_0_contacts_contig, haplotype_1_contacts_contig, merged_intervals_hap0_threshold, merged_intervals_hap1_threshold, haplotig_contacts_contig, total_contacts_with_allelic in PHASESWITCH_CANDIDATES:
+    print('----------------------------------------')
+    print('Potential phase switch in this contig >', str(PHASE_SWITCH_CONTIG_MIN_SIZE/1000000.0), 'Mb:', contig, '(', length, ' bps)')
+    print('Hi-C trans contact to haplotype 0 (without allelic contacts):', str(round(100.0*haplotype_0_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig), 2)), '%')
+    print('Haplotype 0 regions on this contig:')
+    print(merged_intervals_hap0_threshold)
+    print('Hi-C trans contact to haplotype 1 (without allelic contacts):', str(round(100.0*haplotype_1_contacts_contig/(haplotype_0_contacts_contig+haplotype_1_contacts_contig), 2)), '%')  
+    print('Haplotype 1 regions on this contig:')      
+    print(merged_intervals_hap1_threshold)
+    print('Allelic contacts:', str(round(100.0*haplotig_contacts_contig/(total_contacts_with_allelic), 2)), '%') 
+    print('----------------------------------------')
 
 #--------------------------------------
 #--------------------------------------

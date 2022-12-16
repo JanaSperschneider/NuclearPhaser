@@ -287,7 +287,7 @@ First unzip the genome file and then run NuclearPhaser. Your output should be as
 cd ToyExample/
 unzip genome_example.zip
 
-python ../NuclearPhaser.py GeneHits_genome_example.txt full_table_buscov3_genome_example.tsv HiC_MAPQ30.genome_example.20000.matrix.tsv genome_example.fasta /scratch1/spe12g/Testing/Phasing_Testing/
+python ../NuclearPhaser.py GeneHits_genome_example.txt full_table_buscov3_genome_example.tsv HiC_MAPQ30.genome_example.20000.matrix.tsv genome_example.fasta ./Phasing_Testing/
 
 Run minimap2
 [M::mm_idx_gen::1.170*1.01] collected minimizers
@@ -298,7 +298,7 @@ Run minimap2
 [M::mm_idx_stat::1.348*1.24] distinct minimizers: 2279828 (20.90% are singletons); average occurrences: 2.267; average spacing: 9.994
 [M::worker_pipeline::5.031*2.82] mapped 52 sequences
 [M::main] Version: 2.16-r922
-[M::main] CMD: minimap2 -k19 -w19 -m200 -DP -r1000 -t4 -o /scratch1/spe12g/Testing/Phasing_Testing//temp.paf genome_example.fasta genome_example.fasta
+[M::main] CMD: minimap2 -k19 -w19 -m200 -DP -r1000 -t4 -o Phasing_Testing/temp.paf genome_example.fasta genome_example.fasta
 [M::main] Real time: 5.046 sec; CPU: 14.215 sec; Peak RSS: 0.868 GB
 Minimap2 alignments are finished, now scan the paf file.
 Done scanning the PAF alignment file.
@@ -329,8 +329,8 @@ Haplotype_1 ['Bin_1b', 'Bin_2a', 'Bin_3b', 'Bin_4b', 'Bin_5b']
 ----------
 ----------------------------------------
 Recommended to do a DGenies dot-plot alignment of these two files at this stage to confirm that the gene binning & phasing went well:
-/scratch1/spe12g/Testing/Phasing_Testing//Haplotype_0_genephasing.fasta
-/scratch1/spe12g/Testing/Phasing_Testing//Haplotype_1_genephasing.fasta
+Phasing_Testing/Haplotype_0_genephasing.fasta
+Phasing_Testing/Haplotype_1_genephasing.fasta
 ----------------------------------------
 Haplotype 0 length 26.552015 MB
 Haplotype 1 length 25.060897 MB

@@ -12,17 +12,17 @@ contig <- 'tig00000348'
 #---------------------------------
 #---------------------------------
 #---------------------------------
-df <- read.delim(paste(contig, "_HiC_Contacts.txt", sep=""), sep= "\t", header=FALSE)
+df <- read.delim(paste(contig, "_HiC_Contacts.txt", sep=""), sep= "\t", header=TRUE)
 head(df)
 #---------------------------------
 alignments <- read.delim(paste(contig, "_Haplotigs.txt", sep=""), sep= "\t", header=FALSE)
 head(alignments)
 #---------------------------------
-data <- data.frame(x = df$V1,
-                   haplotype0 = df$V4, 
-                   haplotype1 = df$V5)
+data <- data.frame(x = df$X.Start,
+                   haplotype0 = df$X..Hi.C.frequency.to.haplotype.0, 
+                   haplotype1 = df$X..Hi.C.frequency.to.haplotype.1)
 head(data)
-maximum <- max(df$V2)
+maximum <- max(df$End)
 #---------------------------------
 align_coords <- data.frame(x = alignments$V2,
                            y = alignments$V3,
